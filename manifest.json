@@ -1,0 +1,21 @@
+﻿{
+  "name": "vnLearner - Kitty Edition",
+  "short_name": "vnLearner",
+  "description": "Learn Vietnamese with Kitty!",
+  "start_url": "standalone_game.html",
+  "display": "standalone",
+  "background_color": "#FFF9E6",
+  "theme_color": "#FF4500",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
