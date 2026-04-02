@@ -45,7 +45,6 @@
         .btn:hover { transform: scale(1.05); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-home { background: #4a90e2; color: white; min-width: 250px; }
-        .btn-camera { background: #333; color: white; }
         .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; }
 
         .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
@@ -104,16 +103,15 @@
             cursor: pointer;
         }
 
-        
         /* --- HOME VIEW & LANDMARKS --- */
         .home-view {
             width: 100%; height: 500px;
             border-radius: 20px;
             position: relative;
             background: #fdfdfd;
-            display: flex; 
-            justify-content: center; /* Center the pair horizontally */
-            align-items: flex-end;   /* Align them to the floor */
+            display: flex;
+            justify-content: center; 
+            align-items: flex-end;   
             overflow: hidden;
             margin-top: 10px;
             border: 4px solid #ddd;
@@ -124,17 +122,16 @@
             width: 220px;
             height: 380px;
             z-index: 10;
-            margin-right: 20px; /* Distance from landmark */
+            margin-right: 20px; 
         }
-        .place-bg-icon { 
-            font-size: 20rem; 
-            opacity: 0.3; 
+        .place-bg-icon {
+            font-size: 20rem;
+            opacity: 0.3;
             line-height: 1;
             pointer-events: none;
         }
 
-        
-        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: 2px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; z-index: 20; display: none; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }
+        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: 2px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; z-index: 20; display: none; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }     
         .switch-prev { left: 10px; }
         .switch-next { right: 10px; }
         .place-flag { position: absolute; top: 20px; left: 20px; font-size: 3rem; background: white; border-radius: 10px; padding: 5px; border: 2px solid #eee; }
@@ -159,13 +156,9 @@
         .quiz-target { font-size: 8rem; background: #f0f0f0; width: 180px; height: 180px; line-height: 180px; margin: 20px auto; border-radius: 20px; }
         .options-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         .option-card { background: white; border: 3px solid #eee; border-radius: 15px; padding: 15px; cursor: pointer; width: 140px; }
-        
-        
-         50% { opacity: 1; } 100% { opacity: 0; } }
     </style>
 </head>
 <body>
-
 
 <div class="container">
     <div class="top-bar">💎 <span id="points-val">0</span></div>
@@ -180,8 +173,8 @@
         <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
         <div class="char-preview-container">
             <span id="map-char-acc" class="char-part char-acc"></span>
-            <span id="map-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span>
-            <span id="map-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span>
+            <span id="map-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span>  
+            <span id="map-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span> 
             <span id="map-char-head" class="char-part char-head">👤</span>
             <span id="map-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
             <span id="map-char-arm-l" class="char-part char-arm-l"></span>
@@ -189,9 +182,9 @@
             <span id="map-char-body" class="char-part char-body">👕</span>
             <span id="map-char-legs" class="char-part char-legs">👖</span>
             <span id="map-char-shoes" class="char-part char-shoes">👟</span>
-</div>
+        </div>
 
-        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>
+        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>      
 
         <div class="game-nav-list">
             <div class="nav-item" onclick="startVocabSession()">
@@ -208,31 +201,27 @@
     <div id="home-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
         <h2 id="home-title">Nhà của tôi<br><small>My Home</small></h2>
-        
+
         <div class="home-view">
-            
             <div id="home-flag" class="place-flag"></div>
             <button id="prev-place" class="switch-btn switch-prev" onclick="switchPlace(-1)">⬅</button>
             <button id="next-place" class="switch-btn switch-next" onclick="switchPlace(1)">➡</button>
 
-            
             <div class="home-char-wrapper">
-            <span id="home-char-acc" class="char-part char-acc"></span>
-            <span id="home-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span>
-            <span id="home-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span>
-            <span id="home-char-head" class="char-part char-head">👤</span>
-            <span id="home-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
-            <span id="home-char-arm-l" class="char-part char-arm-l"></span>
-            <span id="home-char-arm-r" class="char-part char-arm-r"></span>
-            <span id="home-char-body" class="char-part char-body">👕</span>
-            <span id="home-char-legs" class="char-part char-legs">👖</span>
-            <span id="home-char-shoes" class="char-part char-shoes">👟</span>
-</div>
+                <span id="home-char-acc" class="char-part char-acc"></span>
+                <span id="home-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span> 
+                <span id="home-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span>
+                <span id="home-char-head" class="char-part char-head">👤</span>
+                <span id="home-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
+                <span id="home-char-arm-l" class="char-part char-arm-l"></span>
+                <span id="home-char-arm-r" class="char-part char-arm-r"></span>
+                <span id="home-char-body" class="char-part char-body">👕</span>
+                <span id="home-char-legs" class="char-part char-legs">👖</span>
+                <span id="home-char-shoes" class="char-part char-shoes">👟</span>
+            </div>
 
             <div id="home-place-icon" class="place-bg-icon"></div>
         </div>
-        </div>
-        
     </div>
 
     <div id="shop-screen" class="screen">
@@ -263,25 +252,20 @@
     </div>
 </div>
 
-
 <script>
     const vocabData = [
-        // --- Animals ---
         { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
         { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
         { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
         { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
         { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
-        // --- Fruits & Food ---
         { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
-        { word:'Cam', en:'Orange', emoji:'🍊' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
+        { word:'Cam', en:'Orange', emoji:'Cam' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
         { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
         { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
-        // --- Body Parts ---
         { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
         { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
         { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
-        // --- Objects ---
         { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
         { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
         { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
@@ -453,13 +437,13 @@
         let revealed = 0;
         sessionItems.forEach(item => {
             const card = document.createElement('div'); card.className = 'learn-card';
-            card.innerHTML = `<span style="font-size:3rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text" style="font-size:0.9rem; color:#666; font-weight:normal;">${item.en}</div>`;  
-            card.onclick = () => { 
+            card.innerHTML = `<span style="font-size:3rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text" style="font-size:0.9rem; color:#666; font-weight:normal;">${item.en}</div>`;
+            card.onclick = () => {
                 speak(item.word);
-                if(!card.classList.contains('revealed')){ 
-                    card.classList.add('revealed'); revealed++; 
-                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block'; 
-                } 
+                if(!card.classList.contains('revealed')){
+                    card.classList.add('revealed'); revealed++;
+                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block';
+                }
             };
             grid.appendChild(card);
         });
@@ -477,7 +461,7 @@
             let t = pool.pop();
             document.getElementById('quiz-emoji').innerText = t.emoji;
             document.getElementById('quiz-msg').innerText = '';
-            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 2)].sort(() => 0.5 - Math.random());
+            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 2)].sort(() => 0.5 - Math.random()); 
             const c = document.getElementById('quiz-options'); c.innerHTML = '';
             opts.forEach(o => {
                 const b = document.createElement('div'); b.className = 'option-card';
@@ -485,7 +469,7 @@
                 b.onclick = () => {
                     speak(o.word);
                     if(o.word === t.word) {
-                        points += 20; save(); updateUI(); 
+                        points += 20; save(); updateUI();
                         setTimeout(() => speak('Giỏi quá!'), 600);
                         document.getElementById('quiz-msg').innerHTML = 'Chính xác! +20 💎<br><small>Correct!</small>';
                         setTimeout(next, 1200);
@@ -530,9 +514,7 @@
     }
 
     updateUI();
-</script>
 
-<script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js')
@@ -543,7 +525,3 @@
 </script>
 </body>
 </html>
-
-
-
-

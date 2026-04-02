@@ -1,6 +1,6 @@
-﻿const CACHE_NAME = 'vnlearner-v1';
+const CACHE_NAME = 'vnlearner-v1';
 const ASSETS = [
-  'standalone_game.html',
+  'index.html',
   'manifest.json'
 ];
 
@@ -17,3 +17,4 @@ self.addEventListener('fetch', event => {
       .then(response => response || fetch(event.request))
   );
 });
+
