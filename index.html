@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF4500">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vnLearner - Kitty Edition</title>
+    <title>vnLearner - Kitty & Friends</title>
     <style>
         :root {
             --primary: #FF4500;
@@ -34,10 +34,7 @@
         }
 
         h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }  
-        h2 { margin: 10px 0; font-size: 1.5rem; }
-        p { margin: 5px 0; }
-        small { display: block; font-size: 0.85rem; color: #666; font-weight: normal; }
-
+        
         .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
         .active { display: block; }
 
@@ -49,113 +46,68 @@
 
         .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
 
-        /* --- CHARACTER STYLE --- */
-        .char-preview-container {
+        /* --- CHARACTER LAYERING --- */
+        .char-preview-container, .home-char-wrapper {
             width: 220px; height: 320px;
             margin: 10px auto;
             position: relative;
             background: #fff;
             border-radius: 30px;
             border: 3px solid #eee;
-            overflow: hidden;
+            overflow: visible; /* Changed to visible so hats can poke out top */
         }
 
         .char-part { position: absolute; left: 50%; transform: translateX(-50%); line-height: 1; pointer-events: none; }
-        .char-acc { top: 35px; margin-left: 45px; font-size: 3.5rem; z-index: 10; transform: rotate(15deg); }   
         .char-head { top: 35px; font-size: 8rem; z-index: 5; }
+        .char-face { top: 75px; font-size: 3rem; z-index: 12; }
+        .char-hat { top: 10px; font-size: 5rem; z-index: 15; }
+        .char-acc { top: 35px; margin-left: 45px; font-size: 3.5rem; z-index: 10; transform: rotate(15deg); }   
         .char-arm-l { top: 175px; margin-left: -65px; font-size: 2.5rem; z-index: 4; transform: rotate(-20deg); }
         .char-arm-r { top: 175px; margin-left: 65px; font-size: 2.5rem; z-index: 4; transform: scaleX(-1) rotate(-20deg); }
         .char-body { top: 160px; font-size: 5.5rem; z-index: 3; }
         .char-legs { top: 220px; font-size: 4rem; z-index: 2; }
         .char-shoes { top: 275px; font-size: 2.5rem; z-index: 5; }
+        .char-gear { top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1; }
 
-        /* --- MAP LAYOUT --- */
-        .game-nav-list {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        .nav-item {
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 2px;
-            padding: 10px;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            transition: all 0.2s;
-            width: 80%;
-        }
-        .nav-item:hover { background: #fff9e6; border-color: var(--secondary); }
-        .shop-bar {
-            background: #FFD700;
-            border: 2px solid #FF4500;
-            width: 90%;
-            padding: 10px;
-            border-radius: 10px;
-            margin-top: 10px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* --- HOME VIEW & LANDMARKS --- */
+        /* --- HOME BACKGROUND --- */
         .home-view {
-            width: 100%; height: 500px;
+            width: 100%; height: 450px;
             border-radius: 20px;
             position: relative;
             background: #fdfdfd;
-            display: flex;
-            justify-content: center; 
-            align-items: flex-end;   
+            display: flex; justify-content: center; align-items: center;   
             overflow: hidden;
             margin-top: 10px;
             border: 4px solid #ddd;
-            padding-bottom: 20px;
-        }
-        .home-char-wrapper {
-            position: relative;
-            width: 220px;
-            height: 380px;
-            z-index: 10;
-            margin-right: 20px; 
         }
         .place-bg-icon {
+            position: absolute;
             font-size: 20rem;
-            opacity: 0.3;
-            line-height: 1;
-            pointer-events: none;
+            opacity: 0.2;
+            z-index: 1;
         }
 
-        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: 2px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; z-index: 20; display: none; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }     
+        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: white; border: 2px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; font-weight: bold; }     
         .switch-prev { left: 10px; }
         .switch-next { right: 10px; }
-        .place-flag { position: absolute; top: 20px; left: 20px; font-size: 3rem; background: white; border-radius: 10px; padding: 5px; border: 2px solid #eee; }
 
         /* --- SHOP UI --- */
         .shop-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
-        .tab-btn { padding: 8px 15px; border-radius: 20px; border: 2px solid var(--primary); cursor: pointer; background: white; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
-        .tab-btn span { font-size: 0.7rem; }
+        .tab-btn { padding: 10px; border-radius: 15px; border: 2px solid var(--primary); cursor: pointer; background: white; flex: 1; }
         .tab-btn.active { background: var(--primary); color: white; }
-        .tab-btn.active span { color: #eee; }
         .item-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .item-card { border: 2px solid #eee; border-radius: 15px; padding: 10px; cursor: pointer; background: #fff; }
-        .item-card.equipped { border-color: var(--primary); background: #fff9e6; }
-        .item-card.owned { border-color: var(--accent); }
+        .item-card { border: 2px solid #eee; border-radius: 15px; padding: 10px; cursor: pointer; background: #fff; position: relative; }
+        .item-card.equipped { border: 3px solid var(--primary); background: #fff9e6; }
+        .item-card.owned::after { content: '✅'; position: absolute; top: 5px; right: 5px; font-size: 0.8rem; }
 
-        /* --- GAMEPLAY UI --- */
+        /* --- GAMEPLAY --- */
         .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 15px; padding: 15px; cursor: pointer; height: 140px; display: flex; flex-direction: column; justify-content: center; align-items: center; }  
+        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 15px; padding: 15px; cursor: pointer; height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; }  
         .revealed { border-style: solid; border-color: var(--secondary); background: white; }
         .learn-text { display: none; margin-top: 5px; font-weight: bold; color: var(--primary); }
         .revealed .learn-text { display: block; }
-        .quiz-target { font-size: 8rem; background: #f0f0f0; width: 180px; height: 180px; line-height: 180px; margin: 20px auto; border-radius: 20px; }
-        .options-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        .option-card { background: white; border: 3px solid #eee; border-radius: 15px; padding: 15px; cursor: pointer; width: 140px; }
+        .quiz-target { font-size: 7rem; background: #f0f0f0; width: 160px; height: 160px; line-height: 160px; margin: 20px auto; border-radius: 20px; }
+        .option-card { background: white; border: 3px solid #eee; border-radius: 15px; padding: 15px; cursor: pointer; width: 120px; }
     </style>
 </head>
 <body>
@@ -164,132 +116,114 @@
     <div class="top-bar">💎 <span id="points-val">0</span></div>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="margin-top: 50px;">vnLearner</h1>
-        <p>Học Tiếng Việt cùng Mèo Kitty!<br><small>Learn Vietnamese with Kitty!</small></p>
-        <button class="btn btn-primary" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start</button>
+        <h1 style="margin-top: 60px;">vnLearner</h1>
+        <p>Kitty & Friends Edition</p>
+        <div class="char-preview-container" style="border:none; background:none;">
+             <span id="menu-char-head" class="char-part char-head">🐱</span>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('map-screen')">🚀 BẮT ĐẦU / START</button>
     </div>
 
     <div id="map-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
         <div class="char-preview-container">
-            <span id="map-char-acc" class="char-part char-acc"></span>
-            <span id="map-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span>  
-            <span id="map-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span> 
-            <span id="map-char-head" class="char-part char-head">👤</span>
-            <span id="map-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
-            <span id="map-char-arm-l" class="char-part char-arm-l"></span>
-            <span id="map-char-arm-r" class="char-part char-arm-r"></span>
-            <span id="map-char-body" class="char-part char-body">👕</span>
-            <span id="map-char-legs" class="char-part char-legs">👖</span>
+            <span id="map-char-gear" class="char-part char-gear"></span>
             <span id="map-char-shoes" class="char-part char-shoes">👟</span>
+            <span id="map-char-legs" class="char-part char-legs">👖</span>
+            <span id="map-char-body" class="char-part char-body">👕</span>
+            <span id="map-char-arm-l" class="char-part char-arm-l">🐾</span>
+            <span id="map-char-arm-r" class="char-part char-arm-r">🐾</span>
+            <span id="map-char-head" class="char-part char-head">🐱</span>
+            <span id="map-char-face" class="char-part char-face"></span>
+            <span id="map-char-hat" class="char-part char-hat"></span>
+            <span id="map-char-acc" class="char-part char-acc"></span>
         </div>
-
-        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>      
-
-        <div class="game-nav-list">
-            <div class="nav-item" onclick="startVocabSession()">
-                <span>📕 Từ vựng / Vocab</span>
-            </div>
-            <div class="nav-item" onclick="startToneGame()">
-                <span>🔊 Dấu câu / Tones</span>
-            </div>
+        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>
+        <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; align-items:center;">
+            <button class="btn btn-primary" style="width:80%" onclick="startVocabSession()">📕 Từ vựng / Vocab</button>
+            <button class="btn btn-primary" style="width:80%" onclick="startToneGame()">🔊 Dấu câu / Tones</button>
+            <button class="btn btn-primary" style="width:80%; background:#FFD700; color:#333;" onclick="openShop()">🏪 Cửa hàng / Shop</button>
         </div>
-
-        <div id="shop-node" class="shop-bar" onclick="openShop()">🏪 Cửa hàng / Shop</div>
     </div>
 
     <div id="home-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 id="home-title">Nhà của tôi<br><small>My Home</small></h2>
-
+        <h2 id="home-title">Hạ Long <small>Vietnam</small></h2>
         <div class="home-view">
-            <div id="home-flag" class="place-flag"></div>
-            <button id="prev-place" class="switch-btn switch-prev" onclick="switchPlace(-1)">⬅</button>
-            <button id="next-place" class="switch-btn switch-next" onclick="switchPlace(1)">➡</button>
-
-            <div class="home-char-wrapper">
-                <span id="home-char-acc" class="char-part char-acc"></span>
-                <span id="home-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span> 
-                <span id="home-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span>
-                <span id="home-char-head" class="char-part char-head">👤</span>
-                <span id="home-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
-                <span id="home-char-arm-l" class="char-part char-arm-l"></span>
-                <span id="home-char-arm-r" class="char-part char-arm-r"></span>
-                <span id="home-char-body" class="char-part char-body">👕</span>
-                <span id="home-char-legs" class="char-part char-legs">👖</span>
+            <div id="home-place-icon" class="place-bg-icon">⛵</div>
+            <button class="switch-btn switch-prev" onclick="switchPlace(-1)">⬅</button>
+            <div class="home-char-wrapper" style="border:none; background:none;">
+                <span id="home-char-gear" class="char-part char-gear"></span>
                 <span id="home-char-shoes" class="char-part char-shoes">👟</span>
+                <span id="home-char-legs" class="char-part char-legs">👖</span>
+                <span id="home-char-body" class="char-part char-body">👕</span>
+                <span id="home-char-arm-l" class="char-part char-arm-l">🐾</span>
+                <span id="home-char-arm-r" class="char-part char-arm-r">🐾</span>
+                <span id="home-char-head" class="char-part char-head">🐱</span>
+                <span id="home-char-face" class="char-part char-face"></span>
+                <span id="home-char-hat" class="char-part char-hat"></span>
+                <span id="home-char-acc" class="char-part char-acc"></span>
             </div>
-
-            <div id="home-place-icon" class="place-bg-icon"></div>
+            <button class="switch-btn switch-next" onclick="switchPlace(1)">➡</button>
         </div>
     </div>
 
     <div id="shop-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
         <div class="shop-tabs">
-            <button id="tab-char" class="tab-btn active" onclick="setShopTab('char')">👤 NV <span>Char</span></button>
-            <button id="tab-place" class="tab-btn" onclick="setShopTab('place')">🏛️ Chỗ <span>Place</span></button>
-            <button id="tab-acc" class="tab-btn" onclick="setShopTab('acc')">🎀 Phụ kiện <span>Acc</span></button>
+            <button id="tab-char" class="tab-btn active" onclick="setShopTab('char')">Outfit</button>
+            <button id="tab-place" class="tab-btn" onclick="setShopTab('place')">Places</button>
+            <button id="tab-acc" class="tab-btn" onclick="setShopTab('acc')">Items</button>
         </div>
         <div id="shop-items-container" class="item-list"></div>
     </div>
 
     <div id="learn-screen" class="screen">
         <div id="learn-grid" class="learn-grid"></div>
-        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Làm bài tập (4) / Quiz</button>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Quiz Time!</button>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div class="quiz-target" id="quiz-emoji"></div>
-        <div id="quiz-options" class="options-grid"></div>
-        <h3 id="quiz-msg" style="color:var(--accent)"></h3>
+        <div id="quiz-options" style="display:flex; justify-content:center; gap:10px;"></div>
+        <h3 id="quiz-msg"></h3>
     </div>
 
     <div id="tone-screen" class="screen">
         <div class="quiz-target" id="tone-mark"></div>
-        <div id="tone-options" class="options-grid"></div>
-        <h3 id="tone-msg" style="color:var(--accent)"></h3>
+        <div id="tone-options" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
+        <h3 id="tone-msg"></h3>
     </div>
 </div>
 
 <script>
     const vocabData = [
-        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
-        { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
         { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
-        { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
-        { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
+        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
         { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
-        { word:'Cam', en:'Orange', emoji:'Cam' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
-        { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
-        { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
-        { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
-        { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
-        { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
-        { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
-        { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
-        { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
-        { word:'Mặt trời', en:'Sun', emoji:'☀️' }, { word:'Mặt trăng', en:'Moon', emoji:'🌙' }
+        { word:'Nhà', en:'House', emoji:'🏠' }, { word:'Xe', en:'Car', emoji:'🚗' }
     ];
 
     const toneData = [
-        { name:'Sắc', en:'Rising', mark:'´' },
-        { name:'Huyền', en:'Falling', mark:'`' },
-        { name:'Hỏi', en:'Dipping', mark:'?' },
-        { name:'Ngã', en:'Broken', mark:'~' },
+        { name:'Sắc', en:'Rising', mark:'´' }, { name:'Huyền', en:'Falling', mark:'`' },
+        { name:'Hỏi', en:'Dipping', mark:'?' }, { name:'Ngã', en:'Broken', mark:'~' },
         { name:'Nặng', en:'Low', mark:'.' }
     ];
 
+    const places = {
+        'vn': {e:'⛵', n:'Hạ Long', en:'Vietnam'},
+        'paris': {e:'🗼', n:'Paris', en:'France'},
+        'tokyo': {e:'🗻', n:'Tokyo', en:'Japan'},
+        'ny': {e:'🗽', n:'New York', en:'USA'}
+    };
+
     let points = parseInt(localStorage.getItem('points')) || 0;
-    let charOwned = localStorage.getItem('charOwned') === 'true';
-    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || ['vn'];
     let activePlace = localStorage.getItem('activePlace') || 'vn';
-    let custom = JSON.parse(localStorage.getItem('custom')) || { body:'👗', bodyColor:'blue', shoes:'👟', acc: '', hat: '', face: '', gear: '' };
-    let sessionItems = [];
+    let custom = JSON.parse(localStorage.getItem('custom')) || { body:'👕', bodyColor:'blue', acc:'', hat:'', face:'', gear:'' };
 
     function save() {
         localStorage.setItem('points', points);
-        localStorage.setItem('charOwned', charOwned);
         localStorage.setItem('inventory', JSON.stringify(inventory));
         localStorage.setItem('custom', JSON.stringify(custom));
         localStorage.setItem('activePlace', activePlace);
@@ -302,125 +236,94 @@
     }
 
     function updateCharacterElements(prefix) {
-        const head = document.getElementById(prefix + '-char-head');
-        const armL = document.getElementById(prefix + '-char-arm-l');
-        const armR = document.getElementById(prefix + '-char-arm-r');
-        const body = document.getElementById(prefix + '-char-body');
-        const legs = document.getElementById(prefix + '-char-legs');
-        const shoes = document.getElementById(prefix + '-char-shoes');
-        const acc = document.getElementById(prefix + '-char-acc');
-        const hat = document.getElementById(prefix + '-char-hat');
-        const face = document.getElementById(prefix + '-char-face');
-        const gear = document.getElementById(prefix + '-char-gear');
-
-        if (charOwned) {
-            head.innerText = '🐱'; head.style.filter = 'none';
-            armL.innerText = '🐾'; armR.innerText = '🐾';
-            body.innerText = custom.body || '👕';
-            body.style.color = (custom.bodyColor === 'pink' ? '#e91e63' : '#3498db');
-            legs.innerText = (custom.body === '👗' || custom.body === '👘' ? '' : '👖');
-            legs.style.color = body.style.color;
-            if(shoes) shoes.innerText = custom.shoes || '👟';
-            if(acc) acc.innerText = custom.acc || '';
-            if(hat) hat.innerText = custom.hat || '';
-            if(face) face.innerText = custom.face || '';
-            if(gear) gear.innerText = custom.gear || '';
-        } else {
-            head.innerText = '🐱'; head.style.filter = 'brightness(0) opacity(0.2)';
-            armL.innerText = ''; armR.innerText = ''; body.innerText = '👕'; body.style.color = '#ccc';
-            if(acc) acc.innerText = ''; if(hat) hat.innerText = ''; if(face) face.innerText = ''; if(gear) gear.innerText = '';
-        }
-    }
-
-    function switchPlace(dir) {
-        const ownedPlaces = ['paris', 'tokyo', 'vn', 'london', 'ny', 'egypt', 'sydney', 'beijing', 'rio'].filter(p => inventory.includes(p));
-        if (ownedPlaces.length < 2) return;
-        let idx = ownedPlaces.indexOf(activePlace);
-        idx = (idx + dir + ownedPlaces.length) % ownedPlaces.length;
-        activePlace = ownedPlaces[idx];
-        save(); updateUI();
+        const parts = ['head','body','face','hat','acc','gear','shoes','legs','arm-l','arm-r'];
+        parts.forEach(p => {
+            const el = document.getElementById(`${prefix}-char-${p}`);
+            if(!el) return;
+            
+            if(p === 'head') el.innerText = '🐱';
+            if(p === 'body') {
+                el.innerText = custom.body || '👕';
+                el.style.color = custom.bodyColor === 'pink' ? '#ff69b4' : '#3498db';
+            }
+            if(p === 'legs') el.style.color = custom.bodyColor === 'pink' ? '#ff69b4' : '#3498db';
+            if(['face','hat','acc','gear'].includes(p)) el.innerText = custom[p] || '';
+        });
     }
 
     function updateUI() {
         document.getElementById('points-val').innerText = points;
-        const ownedPlaces = ['paris', 'tokyo', 'vn', 'london', 'ny', 'egypt', 'sydney', 'beijing', 'rio'].filter(p => inventory.includes(p));
-        const showSwitch = ownedPlaces.length >= 2;
-        if(document.getElementById('prev-place')) document.getElementById('prev-place').style.display = showSwitch ? 'flex' : 'none';
-        if(document.getElementById('next-place')) document.getElementById('next-place').style.display = showSwitch ? 'flex' : 'none';
-
         updateCharacterElements('map');
         updateCharacterElements('home');
+        
+        // Update Background
+        const p = places[activePlace];
+        document.getElementById('home-place-icon').innerText = p.e;
+        document.getElementById('home-title').innerHTML = `${p.n} <small>${p.en}</small>`;
+    }
 
-        const places = {
-            'paris': {e:'🗼', f:'🇫🇷', n:'Paris', en:'Paris'},
-            'tokyo': {e:'🗻', f:'🇯🇵', n:'Tokyo', en:'Tokyo'},
-            'vn': {e:'⛵', f:'🇻🇳', n:'Hạ Long', en:'Ha Long Bay'},
-            'london': {e:'🕚', f:'🇬🇧', n:'London', en:'London'},
-            'ny': {e:'🗽', f:'🇺🇸', n:'New York', en:'New York'},
-            'egypt': {e:'🏜️', f:'🇪🇬', n:'Ai Cập', en:'Egypt'},
-            'sydney': {e:'🎭', f:'🇦🇺', n:'Sydney', en:'Sydney'},
-            'beijing': {e:'🧱', f:'🇨🇳', n:'Bắc Kinh', en:'Beijing'},
-            'rio': {e:'🗿', f:'🇧🇷', n:'Rio', en:'Rio'}
-        };
-
-        if (activePlace && places[activePlace]) {
-            document.getElementById('home-place-icon').innerText = places[activePlace].e;
-            document.getElementById('home-flag').innerText = places[activePlace].f;
-            document.getElementById('home-title').innerHTML = `${places[activePlace].n}<br><small>${places[activePlace].en}</small>`;
-        }
+    function switchPlace(dir) {
+        const owned = Object.keys(places).filter(k => inventory.includes(k));
+        let idx = owned.indexOf(activePlace);
+        idx = (idx + dir + owned.length) % owned.length;
+        activePlace = owned[idx];
+        save(); updateUI();
     }
 
     let currentTab = 'char';
-    function setShopTab(tab) { currentTab = tab; renderShop(); }
+    function setShopTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tab).classList.add('active');
+        renderShop();
+    }
 
     function renderShop() {
         const container = document.getElementById('shop-items-container');
         container.innerHTML = '';
         let items = [];
-        if (currentTab === 'char') items = [{ id:'friend', name:'Kitty', en:'Kitty', price:100, emoji:'🐱', type:'char' }];
-        else if (currentTab === 'place') items = [
-            { id:'paris', name:'Paris', en:'Paris', price:150, emoji:'🗼', type:'place' },
-            { id:'tokyo', name:'Tokyo', en:'Tokyo', price:150, emoji:'🗻', type:'place' },
-            { id:'vn', name:'Hạ Long', en:'Ha Long', price:150, emoji:'⛵', type:'place' },
-            { id:'london', name:'London', en:'London', price:150, emoji:'🕚', type:'place' },
-            { id:'ny', name:'New York', en:'New York', price:150, emoji:'🗽', type:'place' },
-            { id:'egypt', name:'Ai Cập', en:'Egypt', price:150, emoji:'🏜️', type:'place' },
-            { id:'sydney', name:'Sydney', en:'Sydney', price:150, emoji:'🎭', type:'place' },
-            { id:'beijing', name:'Bắc Kinh', en:'Beijing', price:150, emoji:'🧱', type:'place' },
-            { id:'rio', name:'Rio', en:'Rio', price:150, emoji:'🗿', type:'place' }
-        ];
-        else if (currentTab === 'acc') items = [
-            { id:'bow', name:'Nơ đỏ', en:'Red Bow', price:50, emoji:'🎀', type:'acc' },
-            { id:'sun', name:'Kính râm', en:'Sunglasses', price:80, emoji:'😎', type:'face' },
-            { id:'cap', name:'Mũ lưỡi trai', en:'Cap', price:100, emoji:'🧢', type:'hat' },
-            { id:'crown', name:'Vương miện', en:'Crown', price:300, emoji:'👑', type:'hat' },
-            { id:'tophat', name:'Mũ phớt', en:'Top Hat', price:150, emoji:'🎩', type:'hat' },
-            { id:'umb', name:'Ô', en:'Umbrella', price:120, emoji:'☂️', type:'gear' },
-            { id:'wings', name:'Cánh', en:'Wings', price:500, emoji:'🦋', type:'gear' },
-            { id:'dress_p', name:'Váy hồng', en:'Pink Dress', price:200, emoji:'👗', type:'body', color:'pink' },
-            { id:'suit', name:'Vest', en:'Suit', price:250, emoji:'👔', type:'body', color:'blue' },
-            { id:'kimono', name:'Kimono', en:'Kimono', price:300, emoji:'👘', type:'body' }
-        ];
+
+        if(currentTab === 'char') {
+            items = [
+                { id:'dress', name:'Váy hồng', emoji:'👗', type:'body', color:'pink', price:50 },
+                { id:'suit', name:'Vest', emoji:'👔', type:'body', color:'blue', price:50 },
+                { id:'kimono', name:'Kimono', emoji:'👘', type:'body', price:100 }
+            ];
+        } else if(currentTab === 'place') {
+            items = [
+                { id:'paris', name:'Paris', emoji:'🗼', type:'place', price:150 },
+                { id:'tokyo', name:'Tokyo', emoji:'🗻', type:'place', price:150 },
+                { id:'ny', name:'New York', emoji:'🗽', type:'place', price:150 }
+            ];
+        } else {
+            items = [
+                { id:'sun', name:'Kính', emoji:'😎', type:'face', price:40 },
+                { id:'cap', name:'Mũ', emoji:'🧢', type:'hat', price:60 },
+                { id:'bow', name:'Nơ', emoji:'🎀', type:'acc', price:30 },
+                { id:'wings', name:'Cánh', emoji:'🦋', type:'gear', price:200 }
+            ];
+        }
 
         items.forEach(item => {
-            const isOwned = (item.id==='friend' && charOwned) || inventory.includes(item.id);
+            const isOwned = inventory.includes(item.id);
+            const isEquipped = custom[item.type] === item.emoji || activePlace === item.id;
+            
             const card = document.createElement('div');
-            card.className = `item-card ${isOwned ? 'owned' : ''}`;
-            const label = isOwned ? 'Đã có / Owned' : item.price + '💎';
-            card.innerHTML = `<span style="font-size:2.5rem;">${item.emoji}</span><br><b>${item.name}</b><br><small>${item.en}</small><br>${label}`;
+            card.className = `item-card ${isOwned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`;
+            card.innerHTML = `<span style="font-size:2rem">${item.emoji}</span><br><small>${isOwned ? 'Apply' : item.price + '💎'}</small>`;
+            
             card.onclick = () => {
-                if (isOwned) {
-                    if (item.type === 'place') activePlace = item.id;
-                    else if (item.type === 'body') { custom.body = item.emoji; if(item.color) custom.bodyColor = item.color; }
-                    else if (item.type === 'acc') custom.acc = (custom.acc === item.emoji ? '' : item.emoji);
-                    else if (item.type === 'hat') custom.hat = (custom.hat === item.emoji ? '' : item.emoji);
-                    else if (item.type === 'face') custom.face = (custom.face === item.emoji ? '' : item.emoji);
-                    else if (item.type === 'gear') custom.gear = (custom.gear === item.emoji ? '' : item.emoji);
+                if(isOwned) {
+                    if(item.type === 'place') activePlace = item.id;
+                    else {
+                        // Toggle item (if click again, remove it)
+                        custom[item.type] = (custom[item.type] === item.emoji) ? '' : item.emoji;
+                        if(item.color) custom.bodyColor = item.color;
+                    }
                     save(); updateUI(); renderShop();
-                } else if (points >= item.price) {
+                } else if(points >= item.price) {
                     points -= item.price;
-                    if (item.id === 'friend') charOwned = true;
-                    else inventory.push(item.id);
+                    inventory.push(item.id);
                     save(); updateUI(); renderShop();
                 }
             };
@@ -430,20 +333,23 @@
 
     function openShop() { showScreen('shop-screen'); renderShop(); }
 
+    // --- GAME LOGIC ---
+    let session = [];
     function startVocabSession() {
         showScreen('learn-screen');
-        sessionItems = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        session = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
         const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
-        let revealed = 0;
-        sessionItems.forEach(item => {
+        let count = 0;
+        session.forEach(item => {
             const card = document.createElement('div'); card.className = 'learn-card';
-            card.innerHTML = `<span style="font-size:3rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text" style="font-size:0.9rem; color:#666; font-weight:normal;">${item.en}</div>`;
+            card.innerHTML = `<span style="font-size:3rem">${item.emoji}</span><div class="learn-text">${item.word}</div>`;
             card.onclick = () => {
-                speak(item.word);
-                if(!card.classList.contains('revealed')){
-                    card.classList.add('revealed'); revealed++;
-                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block';
+                if(!card.classList.contains('revealed')) {
+                    card.classList.add('revealed');
+                    count++;
+                    if(count === 4) document.getElementById('next-quiz-btn').style.display = 'block';
                 }
+                speak(item.word);
             };
             grid.appendChild(card);
         });
@@ -451,77 +357,52 @@
 
     function startVocabQuiz() {
         showScreen('quiz-screen');
-        let pool = [...sessionItems].sort(() => 0.5 - Math.random());
-        function next() {
-            if (pool.length === 0) {
-                save(); speak('Hoàn thành!');
-                document.getElementById('quiz-msg').innerHTML = 'Hoàn thành! / Finished! 🎉';
-                setTimeout(() => showScreen('map-screen'), 1500); return;
-            }
-            let t = pool.pop();
-            document.getElementById('quiz-emoji').innerText = t.emoji;
-            document.getElementById('quiz-msg').innerText = '';
-            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 2)].sort(() => 0.5 - Math.random()); 
-            const c = document.getElementById('quiz-options'); c.innerHTML = '';
-            opts.forEach(o => {
-                const b = document.createElement('div'); b.className = 'option-card';
-                b.innerHTML = `<b>${o.word}</b><br><small>${o.en}</small>`;
-                b.onclick = () => {
-                    speak(o.word);
-                    if(o.word === t.word) {
-                        points += 20; save(); updateUI();
-                        setTimeout(() => speak('Giỏi quá!'), 600);
-                        document.getElementById('quiz-msg').innerHTML = 'Chính xác! +20 💎<br><small>Correct!</small>';
-                        setTimeout(next, 1200);
-                    }
-                };
-                c.appendChild(b);
-            });
-        }
-        next();
+        const target = session[Math.floor(Math.random()*4)];
+        document.getElementById('quiz-emoji').innerText = target.emoji;
+        const options = document.getElementById('quiz-options'); options.innerHTML = '';
+        [target, ...vocabData.filter(v => v !== target).slice(0, 2)].sort(() => 0.5 - Math.random()).forEach(o => {
+            const btn = document.createElement('div'); btn.className = 'option-card';
+            btn.innerText = o.word;
+            btn.onclick = () => {
+                if(o === target) {
+                    points += 20;
+                    document.getElementById('quiz-msg').innerText = "🎉 +20💎";
+                    save(); updateUI();
+                    setTimeout(() => showScreen('map-screen'), 1000);
+                } else {
+                    document.getElementById('quiz-msg').innerText = "❌ Thử lại!";
+                }
+            };
+            options.appendChild(btn);
+        });
     }
 
     function startToneGame() {
         showScreen('tone-screen');
-        function next() {
-            let t = toneData[Math.floor(Math.random()*toneData.length)];
-            document.getElementById('tone-mark').innerText = t.mark;
-            document.getElementById('tone-msg').innerText = '';
-            const c = document.getElementById('tone-options'); c.innerHTML = '';
-            toneData.forEach(o => {
-                const b = document.createElement('div'); b.className = 'option-card';
-                b.innerHTML = `<b>${o.name}</b><br><small>${o.en}</small>`;
-                b.onclick = () => {
-                    speak(o.name);
-                    if(o.name === t.name) {
-                        points += 20; save(); updateUI();
-                        setTimeout(() => speak('Đúng rồi!'), 600);
-                        document.getElementById('tone-msg').innerHTML = 'Đúng rồi! +20 💎<br><small>Right!</small>';
-                        setTimeout(next, 1200);
-                    }
-                };
-                c.appendChild(b);
-            });
-        }
-        next();
+        const target = toneData[Math.floor(Math.random()*toneData.length)];
+        document.getElementById('tone-mark').innerText = target.mark;
+        const opts = document.getElementById('tone-options'); opts.innerHTML = '';
+        toneData.forEach(t => {
+            const btn = document.createElement('div'); btn.className = 'option-card';
+            btn.innerText = t.name;
+            btn.onclick = () => {
+                if(t === target) {
+                    points += 20; save(); updateUI();
+                    document.getElementById('tone-msg').innerText = "✨ Đúng rồi!";
+                    setTimeout(() => showScreen('map-screen'), 1000);
+                }
+            };
+            opts.appendChild(btn);
+        });
     }
 
     function speak(t) {
-        window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(t);
         u.lang = 'vi-VN';
         window.speechSynthesis.speak(u);
     }
 
     updateUI();
-
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('PWA Service Worker registered'))
-                .catch(err => console.log('PWA Service Worker registration failed', err));
-        });
-    }
 </script>
 </body>
 </html>
