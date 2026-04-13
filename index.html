@@ -18,96 +18,69 @@
         body {
             margin: 0; padding: 0;
             background-color: var(--bg);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            font-family: 'Comic Sans MS', sans-serif;
             color: var(--text);
             display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden;
         }
 
         .container {
-            background: white; padding: 2rem; border-radius: 30px;
+            background: white; padding: 1.5rem; border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid var(--secondary);
-            text-align: center; max-width: 850px; width: 95%;
+            text-align: center; max-width: 500px; width: 95%;
             position: relative; height: 90vh;
             display: flex; flex-direction: column;
         }
 
-        h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }  
-        
-        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 5px; }
         .active { display: block; }
 
         .btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
-        .btn:hover { transform: scale(1.05); }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-home { background: #4a90e2; color: white; min-width: 250px; }
-        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .btn-home { background: #4a90e2; color: white; width: 80%; }
+        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 100; }
 
-        .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
+        .top-bar { position: absolute; top: 15px; right: 15px; font-weight: bold; color: var(--primary); z-index: 10; }
 
         /* --- CHARACTER LAYERING --- */
-        .char-preview-container, .home-char-wrapper {
-            width: 220px; height: 320px;
+        .char-preview-container {
+            width: 200px; height: 280px;
             margin: 10px auto;
             position: relative;
-            background: #fff;
-            border-radius: 30px;
-            border: 3px solid #eee;
-            overflow: visible; /* Changed to visible so hats can poke out top */
         }
-
         .char-part { position: absolute; left: 50%; transform: translateX(-50%); line-height: 1; pointer-events: none; }
-        .char-head { top: 35px; font-size: 8rem; z-index: 5; }
-        .char-face { top: 75px; font-size: 3rem; z-index: 12; }
-        .char-hat { top: 10px; font-size: 5rem; z-index: 15; }
-        .char-acc { top: 35px; margin-left: 45px; font-size: 3.5rem; z-index: 10; transform: rotate(15deg); }   
-        .char-arm-l { top: 175px; margin-left: -65px; font-size: 2.5rem; z-index: 4; transform: rotate(-20deg); }
-        .char-arm-r { top: 175px; margin-left: 65px; font-size: 2.5rem; z-index: 4; transform: scaleX(-1) rotate(-20deg); }
-        .char-body { top: 160px; font-size: 5.5rem; z-index: 3; }
-        .char-legs { top: 220px; font-size: 4rem; z-index: 2; }
-        .char-shoes { top: 275px; font-size: 2.5rem; z-index: 5; }
-        .char-gear { top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1; }
+        .char-head { top: 40px; font-size: 7rem; z-index: 5; }
+        .char-face { top: 75px; font-size: 2.5rem; z-index: 12; }
+        .char-hat { top: 15px; font-size: 4.5rem; z-index: 15; }
+        .char-acc { top: 40px; margin-left: 40px; font-size: 3rem; z-index: 10; }   
+        .char-body { top: 150px; font-size: 5rem; z-index: 3; }
+        .char-gear { top: 140px; margin-left: 70px; font-size: 4rem; z-index: 1; }
 
-        /* --- HOME BACKGROUND --- */
+        /* --- BACKGROUND VIEW --- */
         .home-view {
-            width: 100%; height: 450px;
+            width: 100%; height: 350px;
             border-radius: 20px;
             position: relative;
-            background: #fdfdfd;
+            background: #f0f0f0;
             display: flex; justify-content: center; align-items: center;   
             overflow: hidden;
-            margin-top: 10px;
-            border: 4px solid #ddd;
+            border: 3px solid #ddd;
         }
-        .place-bg-icon {
-            position: absolute;
-            font-size: 20rem;
-            opacity: 0.2;
-            z-index: 1;
-        }
+        .place-bg-icon { position: absolute; font-size: 18rem; opacity: 0.15; z-index: 1; }
 
-        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: white; border: 2px solid var(--primary); border-radius: 50%; width: 45px; height: 45px; cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center; font-weight: bold; }     
-        .switch-prev { left: 10px; }
-        .switch-next { right: 10px; }
-
-        /* --- SHOP UI --- */
-        .shop-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
-        .tab-btn { padding: 10px; border-radius: 15px; border: 2px solid var(--primary); cursor: pointer; background: white; flex: 1; }
+        /* --- SHOP --- */
+        .shop-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        .tab-btn { padding: 8px; border-radius: 10px; border: 1px solid var(--primary); cursor: pointer; background: white; flex: 1; font-size: 0.8rem; }
         .tab-btn.active { background: var(--primary); color: white; }
-        .item-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .item-card { border: 2px solid #eee; border-radius: 15px; padding: 10px; cursor: pointer; background: #fff; position: relative; }
-        .item-card.equipped { border: 3px solid var(--primary); background: #fff9e6; }
-        .item-card.owned::after { content: '✅'; position: absolute; top: 5px; right: 5px; font-size: 0.8rem; }
+        .item-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .item-card { border: 2px solid #eee; border-radius: 12px; padding: 8px; cursor: pointer; background: #fff; position: relative; }
+        .item-card.equipped { border-color: var(--primary); background: #fff9e6; }
+        .item-card.owned::after { content: '✅'; position: absolute; top: 2px; right: 2px; font-size: 0.7rem; }
 
-        /* --- GAMEPLAY --- */
         .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 15px; padding: 15px; cursor: pointer; height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; }  
+        .learn-card { background: #f9f9f9; border: 2px dashed #ccc; border-radius: 15px; padding: 10px; cursor: pointer; }
         .revealed { border-style: solid; border-color: var(--secondary); background: white; }
-        .learn-text { display: none; margin-top: 5px; font-weight: bold; color: var(--primary); }
-        .revealed .learn-text { display: block; }
-        .quiz-target { font-size: 7rem; background: #f0f0f0; width: 160px; height: 160px; line-height: 160px; margin: 20px auto; border-radius: 20px; }
-        .option-card { background: white; border: 3px solid #eee; border-radius: 15px; padding: 15px; cursor: pointer; width: 120px; }
     </style>
 </head>
 <body>
@@ -116,105 +89,78 @@
     <div class="top-bar">💎 <span id="points-val">0</span></div>
 
     <div id="menu-screen" class="screen active">
-        <h1 style="margin-top: 60px;">vnLearner</h1>
-        <p>Kitty & Friends Edition</p>
-        <div class="char-preview-container" style="border:none; background:none;">
+        <h1 style="color:var(--primary); margin-top:40px;">vnLearner</h1>
+        <div class="char-preview-container">
              <span id="menu-char-head" class="char-part char-head">🐱</span>
         </div>
-        <button class="btn btn-primary" onclick="showScreen('map-screen')">🚀 BẮT ĐẦU / START</button>
+        <button class="btn btn-primary" onclick="showScreen('map-screen')">PLAY</button>
     </div>
 
     <div id="map-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
         <div class="char-preview-container">
-            <span id="map-char-gear" class="char-part char-gear"></span>
-            <span id="map-char-shoes" class="char-part char-shoes">👟</span>
-            <span id="map-char-legs" class="char-part char-legs">👖</span>
-            <span id="map-char-body" class="char-part char-body">👕</span>
-            <span id="map-char-arm-l" class="char-part char-arm-l">🐾</span>
-            <span id="map-char-arm-r" class="char-part char-arm-r">🐾</span>
             <span id="map-char-head" class="char-part char-head">🐱</span>
+            <span id="map-char-body" class="char-part char-body">👕</span>
             <span id="map-char-face" class="char-part char-face"></span>
             <span id="map-char-hat" class="char-part char-hat"></span>
             <span id="map-char-acc" class="char-part char-acc"></span>
+            <span id="map-char-gear" class="char-part char-gear"></span>
         </div>
-        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>
-        <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px; align-items:center;">
-            <button class="btn btn-primary" style="width:80%" onclick="startVocabSession()">📕 Từ vựng / Vocab</button>
-            <button class="btn btn-primary" style="width:80%" onclick="startToneGame()">🔊 Dấu câu / Tones</button>
-            <button class="btn btn-primary" style="width:80%; background:#FFD700; color:#333;" onclick="openShop()">🏪 Cửa hàng / Shop</button>
+        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 My Home</button>
+        <div style="margin-top:10px;">
+            <button class="btn btn-primary" onclick="startVocabSession()">📕 Vocab</button>
+            <button class="btn btn-primary" style="background:#FFD700; color:#333;" onclick="openShop()">🏪 Shop</button>
         </div>
     </div>
 
     <div id="home-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 id="home-title">Hạ Long <small>Vietnam</small></h2>
+        <h2 id="home-title">Vietnam</h2>
         <div class="home-view">
             <div id="home-place-icon" class="place-bg-icon">⛵</div>
-            <button class="switch-btn switch-prev" onclick="switchPlace(-1)">⬅</button>
-            <div class="home-char-wrapper" style="border:none; background:none;">
-                <span id="home-char-gear" class="char-part char-gear"></span>
-                <span id="home-char-shoes" class="char-part char-shoes">👟</span>
-                <span id="home-char-legs" class="char-part char-legs">👖</span>
-                <span id="home-char-body" class="char-part char-body">👕</span>
-                <span id="home-char-arm-l" class="char-part char-arm-l">🐾</span>
-                <span id="home-char-arm-r" class="char-part char-arm-r">🐾</span>
+            <div class="char-preview-container">
                 <span id="home-char-head" class="char-part char-head">🐱</span>
+                <span id="home-char-body" class="char-part char-body">👕</span>
                 <span id="home-char-face" class="char-part char-face"></span>
                 <span id="home-char-hat" class="char-part char-hat"></span>
                 <span id="home-char-acc" class="char-part char-acc"></span>
+                <span id="home-char-gear" class="char-part char-gear"></span>
             </div>
-            <button class="switch-btn switch-next" onclick="switchPlace(1)">➡</button>
         </div>
     </div>
 
     <div id="shop-screen" class="screen">
         <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <div class="shop-tabs">
-            <button id="tab-char" class="tab-btn active" onclick="setShopTab('char')">Outfit</button>
-            <button id="tab-place" class="tab-btn" onclick="setShopTab('place')">Places</button>
+        <div class="shop-tabs" style="margin-top:40px;">
+            <button id="tab-char" class="tab-btn active" onclick="setShopTab('char')">Outfits</button>
             <button id="tab-acc" class="tab-btn" onclick="setShopTab('acc')">Items</button>
+            <button id="tab-place" class="tab-btn" onclick="setShopTab('place')">Places</button>
         </div>
         <div id="shop-items-container" class="item-list"></div>
     </div>
 
     <div id="learn-screen" class="screen">
         <div id="learn-grid" class="learn-grid"></div>
-        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Quiz Time!</button>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none;" onclick="startVocabQuiz()">Quiz!</button>
     </div>
 
     <div id="quiz-screen" class="screen">
-        <div class="quiz-target" id="quiz-emoji"></div>
-        <div id="quiz-options" style="display:flex; justify-content:center; gap:10px;"></div>
-        <h3 id="quiz-msg"></h3>
-    </div>
-
-    <div id="tone-screen" class="screen">
-        <div class="quiz-target" id="tone-mark"></div>
-        <div id="tone-options" style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;"></div>
-        <h3 id="tone-msg"></h3>
+        <div id="quiz-emoji" style="font-size:5rem; margin:20px;"></div>
+        <div id="quiz-options"></div>
     </div>
 </div>
 
 <script>
     const vocabData = [
         { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
-        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
-        { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
-        { word:'Nhà', en:'House', emoji:'🏠' }, { word:'Xe', en:'Car', emoji:'🚗' }
-    ];
-
-    const toneData = [
-        { name:'Sắc', en:'Rising', mark:'´' }, { name:'Huyền', en:'Falling', mark:'`' },
-        { name:'Hỏi', en:'Dipping', mark:'?' }, { name:'Ngã', en:'Broken', mark:'~' },
-        { name:'Nặng', en:'Low', mark:'.' }
+        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Táo', en:'Apple', emoji:'🍎' }
     ];
 
     const places = {
         'vn': {e:'⛵', n:'Hạ Long', en:'Vietnam'},
-        'paris': {e:'🗼', n:'Paris', en:'France'},
-        'tokyo': {e:'🗻', n:'Tokyo', en:'Japan'},
-        'ny': {e:'🗽', n:'New York', en:'USA'}
+        'cyber': {e:'🏙️', n:'Neo-Saigon', en:'Future'},
+        'zootopia': {e:'🦒', n:'Zootopia', en:'Savanna Central'},
+        'paris': {e:'🗼', n:'Paris', en:'France'}
     };
 
     let points = parseInt(localStorage.getItem('points')) || 0;
@@ -236,17 +182,15 @@
     }
 
     function updateCharacterElements(prefix) {
-        const parts = ['head','body','face','hat','acc','gear','shoes','legs','arm-l','arm-r'];
+        const parts = ['head','body','face','hat','acc','gear'];
         parts.forEach(p => {
             const el = document.getElementById(`${prefix}-char-${p}`);
             if(!el) return;
-            
             if(p === 'head') el.innerText = '🐱';
             if(p === 'body') {
-                el.innerText = custom.body || '👕';
-                el.style.color = custom.bodyColor === 'pink' ? '#ff69b4' : '#3498db';
+                el.innerText = custom.body;
+                el.style.color = custom.bodyColor === 'pink' ? '#ff69b4' : (custom.bodyColor === 'black' ? '#333' : '#3498db');
             }
-            if(p === 'legs') el.style.color = custom.bodyColor === 'pink' ? '#ff69b4' : '#3498db';
             if(['face','hat','acc','gear'].includes(p)) el.innerText = custom[p] || '';
         });
     }
@@ -255,19 +199,9 @@
         document.getElementById('points-val').innerText = points;
         updateCharacterElements('map');
         updateCharacterElements('home');
-        
-        // Update Background
-        const p = places[activePlace];
+        const p = places[activePlace] || places['vn'];
         document.getElementById('home-place-icon').innerText = p.e;
-        document.getElementById('home-title').innerHTML = `${p.n} <small>${p.en}</small>`;
-    }
-
-    function switchPlace(dir) {
-        const owned = Object.keys(places).filter(k => inventory.includes(k));
-        let idx = owned.indexOf(activePlace);
-        idx = (idx + dir + owned.length) % owned.length;
-        activePlace = owned[idx];
-        save(); updateUI();
+        document.getElementById('home-title').innerText = p.n;
     }
 
     let currentTab = 'char';
@@ -285,45 +219,44 @@
 
         if(currentTab === 'char') {
             items = [
-                { id:'dress', name:'Váy hồng', emoji:'👗', type:'body', color:'pink', price:50 },
-                { id:'suit', name:'Vest', emoji:'👔', type:'body', color:'blue', price:50 },
-                { id:'kimono', name:'Kimono', emoji:'👘', type:'body', price:100 }
+                { id: 'idol', name: 'K-Pop', emoji: '🕺', type: 'body', color: 'pink', price: 100 },
+                { id: 'hunter', name: 'Hunter', emoji: '🥋', type: 'body', color: 'black', price: 150 },
+                { id: 'police', name: 'Police', emoji: '👮', type: 'body', color: 'blue', price: 120 },
+                { id: 'classic', name: 'Blue', emoji: '👕', type: 'body', color: 'blue', price: 0 }
             ];
-        } else if(currentTab === 'place') {
+        } else if(currentTab === 'acc') {
             items = [
-                { id:'paris', name:'Paris', emoji:'🗼', type:'place', price:150 },
-                { id:'tokyo', name:'Tokyo', emoji:'🗻', type:'place', price:150 },
-                { id:'ny', name:'New York', emoji:'🗽', type:'place', price:150 }
+                { id: 'blade', name: 'Blade', emoji: '🗡️', type: 'gear', price: 200 },
+                { id: 'mask', name: 'Mask', emoji: '🎭', type: 'face', price: 80 },
+                { id: 'bunny', name: 'Judy', emoji: '🐰', type: 'hat', price: 100 },
+                { id: 'donut', name: 'Donut', emoji: '🍩', type: 'acc', price: 30 },
+                { id: 'glasses', name: 'Cool', emoji: '🕶️', type: 'face', price: 50 }
             ];
         } else {
             items = [
-                { id:'sun', name:'Kính', emoji:'😎', type:'face', price:40 },
-                { id:'cap', name:'Mũ', emoji:'🧢', type:'hat', price:60 },
-                { id:'bow', name:'Nơ', emoji:'🎀', type:'acc', price:30 },
-                { id:'wings', name:'Cánh', emoji:'🦋', type:'gear', price:200 }
+                { id: 'cyber', name: 'Cyber', emoji: '🏙️', type: 'place', price: 200 },
+                { id: 'zootopia', name: 'Zootopia', emoji: '🦒', type: 'place', price: 180 },
+                { id: 'paris', name: 'Paris', emoji: '🗼', type: 'place', price: 120 }
             ];
         }
 
         items.forEach(item => {
-            const isOwned = inventory.includes(item.id);
+            const isOwned = inventory.includes(item.id) || item.price === 0;
             const isEquipped = custom[item.type] === item.emoji || activePlace === item.id;
-            
             const card = document.createElement('div');
             card.className = `item-card ${isOwned ? 'owned' : ''} ${isEquipped ? 'equipped' : ''}`;
-            card.innerHTML = `<span style="font-size:2rem">${item.emoji}</span><br><small>${isOwned ? 'Apply' : item.price + '💎'}</small>`;
+            card.innerHTML = `<span style="font-size:2rem">${item.emoji}</span><br><small>${isOwned ? 'Equip' : item.price+'💎'}</small>`;
             
             card.onclick = () => {
                 if(isOwned) {
                     if(item.type === 'place') activePlace = item.id;
                     else {
-                        // Toggle item (if click again, remove it)
                         custom[item.type] = (custom[item.type] === item.emoji) ? '' : item.emoji;
                         if(item.color) custom.bodyColor = item.color;
                     }
                     save(); updateUI(); renderShop();
                 } else if(points >= item.price) {
-                    points -= item.price;
-                    inventory.push(item.id);
+                    points -= item.price; inventory.push(item.id);
                     save(); updateUI(); renderShop();
                 }
             };
@@ -333,23 +266,18 @@
 
     function openShop() { showScreen('shop-screen'); renderShop(); }
 
-    // --- GAME LOGIC ---
     let session = [];
     function startVocabSession() {
         showScreen('learn-screen');
-        session = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        session = vocabData.sort(() => 0.5 - Math.random());
         const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
         let count = 0;
         session.forEach(item => {
             const card = document.createElement('div'); card.className = 'learn-card';
-            card.innerHTML = `<span style="font-size:3rem">${item.emoji}</span><div class="learn-text">${item.word}</div>`;
+            card.innerHTML = `<span style="font-size:2rem">${item.emoji}</span><p>${item.word}</p>`;
             card.onclick = () => {
-                if(!card.classList.contains('revealed')) {
-                    card.classList.add('revealed');
-                    count++;
-                    if(count === 4) document.getElementById('next-quiz-btn').style.display = 'block';
-                }
-                speak(item.word);
+                if(!card.classList.contains('revealed')) { card.classList.add('revealed'); count++; }
+                if(count === session.length) document.getElementById('next-quiz-btn').style.display = 'block';
             };
             grid.appendChild(card);
         });
@@ -357,49 +285,17 @@
 
     function startVocabQuiz() {
         showScreen('quiz-screen');
-        const target = session[Math.floor(Math.random()*4)];
+        const target = session[0];
         document.getElementById('quiz-emoji').innerText = target.emoji;
         const options = document.getElementById('quiz-options'); options.innerHTML = '';
-        [target, ...vocabData.filter(v => v !== target).slice(0, 2)].sort(() => 0.5 - Math.random()).forEach(o => {
-            const btn = document.createElement('div'); btn.className = 'option-card';
+        session.forEach(o => {
+            const btn = document.createElement('button'); btn.className = 'btn btn-primary';
             btn.innerText = o.word;
             btn.onclick = () => {
-                if(o === target) {
-                    points += 20;
-                    document.getElementById('quiz-msg').innerText = "🎉 +20💎";
-                    save(); updateUI();
-                    setTimeout(() => showScreen('map-screen'), 1000);
-                } else {
-                    document.getElementById('quiz-msg').innerText = "❌ Thử lại!";
-                }
+                if(o === target) { points += 50; save(); showScreen('map-screen'); }
             };
             options.appendChild(btn);
         });
-    }
-
-    function startToneGame() {
-        showScreen('tone-screen');
-        const target = toneData[Math.floor(Math.random()*toneData.length)];
-        document.getElementById('tone-mark').innerText = target.mark;
-        const opts = document.getElementById('tone-options'); opts.innerHTML = '';
-        toneData.forEach(t => {
-            const btn = document.createElement('div'); btn.className = 'option-card';
-            btn.innerText = t.name;
-            btn.onclick = () => {
-                if(t === target) {
-                    points += 20; save(); updateUI();
-                    document.getElementById('tone-msg').innerText = "✨ Đúng rồi!";
-                    setTimeout(() => showScreen('map-screen'), 1000);
-                }
-            };
-            opts.appendChild(btn);
-        });
-    }
-
-    function speak(t) {
-        const u = new SpeechSynthesisUtterance(t);
-        u.lang = 'vi-VN';
-        window.speechSynthesis.speak(u);
     }
 
     updateUI();
