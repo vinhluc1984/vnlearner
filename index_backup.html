@@ -1,0 +1,500 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF4500">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vnLearner - Kitty & Froggy Edition</title>
+    <style>
+        :root {
+            --primary: #FF4500;
+            --secondary: #FFD700;
+            --accent: #008000;
+            --text: #333;
+            --bg: #FFF9E6;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            color: var(--text);
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        .container {
+            background: white; padding: 2rem; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid var(--secondary);
+            text-align: center; max-width: 850px; width: 95%;
+            position: relative; height: 90vh;
+            display: flex; flex-direction: column;
+        }
+
+        h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }  
+        h2 { margin: 10px 0; font-size: 1.5rem; }
+        p { margin: 5px 0; }
+        small { display: block; font-size: 0.85rem; color: #666; font-weight: normal; }
+
+        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .active { display: block; }
+
+        .btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
+        .btn:hover { transform: scale(1.05); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-home { background: #4a90e2; color: white; min-width: 250px; }
+        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; }
+
+        .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
+
+        /* --- CHARACTER STYLE --- */
+        .char-preview-container {
+            width: 220px; height: 320px;
+            margin: 10px auto;
+            position: relative;
+            background: #fff;
+            border-radius: 30px;
+            border: 3px solid #eee;
+            overflow: hidden;
+        }
+
+        .char-part { position: absolute; left: 50%; transform: translateX(-50%); line-height: 1; pointer-events: none; }
+        .char-acc { top: 35px; margin-left: 45px; font-size: 3.5rem; z-index: 10; transform: rotate(15deg); }   
+        .char-head { top: 35px; font-size: 8rem; z-index: 5; }
+        .char-arm-l { top: 175px; margin-left: -65px; font-size: 2.5rem; z-index: 4; transform: rotate(-20deg); }
+        .char-arm-r { top: 175px; margin-left: 65px; font-size: 2.5rem; z-index: 4; transform: scaleX(-1) rotate(-20deg); }
+        .char-body { top: 160px; font-size: 5.5rem; z-index: 3; }
+        .char-legs { top: 220px; font-size: 4rem; z-index: 2; }
+        .char-shoes { top: 275px; font-size: 2.5rem; z-index: 5; }
+
+        /* --- MAP LAYOUT --- */
+        .game-nav-list {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-item {
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 10px;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            transition: all 0.2s;
+            width: 80%;
+        }
+        .nav-item:hover { background: #fff9e6; border-color: var(--secondary); }
+        .shop-bar {
+            background: #FFD700;
+            border: 2px solid #FF4500;
+            width: 90%;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* --- HOME VIEW & LANDMARKS --- */
+        .home-view {
+            width: 100%; height: 500px;
+            border-radius: 20px;
+            position: relative;
+            background: #fdfdfd;
+            display: flex;
+            justify-content: center; 
+            align-items: flex-end;   
+            overflow: hidden;
+            margin-top: 10px;
+            border: 4px solid #ddd;
+            padding-bottom: 20px;
+        }
+        .home-char-wrapper {
+            position: relative;
+            width: 220px;
+            height: 380px;
+            z-index: 10;
+            margin-right: 20px; 
+        }
+        .place-bg-icon {
+            font-size: 20rem;
+            opacity: 0.3;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .switch-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: 2px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; cursor: pointer; z-index: 20; display: none; align-items: center; justify-content: center; font-weight: bold; color: var(--primary); }     
+        .switch-prev { left: 10px; }
+        .switch-next { right: 10px; }
+        .place-flag { position: absolute; top: 20px; left: 20px; font-size: 3rem; background: white; border-radius: 10px; padding: 5px; border: 2px solid #eee; }
+
+        /* --- SHOP UI --- */
+        .shop-tabs { display: flex; justify-content: center; gap: 5px; margin-bottom: 15px; }
+        .tab-btn { padding: 8px 15px; border-radius: 20px; border: 2px solid var(--primary); cursor: pointer; background: white; font-weight: bold; display: flex; flex-direction: column; align-items: center; }
+        .tab-btn span { font-size: 0.7rem; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-btn.active span { color: #eee; }
+        .item-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .item-card { border: 2px solid #eee; border-radius: 15px; padding: 10px; cursor: pointer; background: #fff; }
+        .item-card.equipped { border-color: var(--primary); background: #fff9e6; }
+        .item-card.owned { border-color: var(--accent); }
+
+        /* --- GAMEPLAY UI (ENLARGED) --- */
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 15px; padding: 15px; cursor: pointer; height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; }  
+        .revealed { border-style: solid; border-color: var(--secondary); background: white; }
+        
+        .learn-text { display: none; margin-top: 5px; font-weight: bold; color: var(--primary); font-size: 2rem; }
+        .revealed .learn-text { display: block; }
+        .learn-text-en { font-size: 1.8rem; color: #666; font-weight: normal; }
+
+        .quiz-target { font-size: 8rem; background: #f0f0f0; width: 180px; height: 180px; line-height: 180px; margin: 20px auto; border-radius: 20px; }
+        .options-grid { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .option-card { background: white; border: 3px solid #eee; border-radius: 15px; padding: 15px; cursor: pointer; width: 180px; font-size: 2.2rem; }
+        .option-card small { font-size: 1.7rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">💎 <span id="points-val">0</span></div>
+
+    <div id="menu-screen" class="screen active">
+        <h1 style="margin-top: 50px;">vnLearner</h1>
+        <p>Học Tiếng Việt cùng những người bạn!<br><small>Learn Vietnamese with Friends!</small></p>
+        <button class="btn btn-primary" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start</button>
+    </div>
+
+    <div id="map-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
+        <div class="char-preview-container">
+            <span id="map-char-acc" class="char-part char-acc"></span>
+            <span id="map-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span>  
+            <span id="map-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span> 
+            <span id="map-char-head" class="char-part char-head">👤</span>
+            <span id="map-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
+            <span id="map-char-arm-l" class="char-part char-arm-l"></span>
+            <span id="map-char-arm-r" class="char-part char-arm-r"></span>
+            <span id="map-char-body" class="char-part char-body">👕</span>
+            <span id="map-char-legs" class="char-part char-legs">👖</span>
+            <span id="map-char-shoes" class="char-part char-shoes">👟</span>
+        </div>
+
+        <button class="btn btn-home" onclick="showScreen('home-screen')">🏠 Nhà của tôi / My Home</button>      
+
+        <div class="game-nav-list">
+            <div class="nav-item" onclick="startVocabSession()">
+                <span>📕 Từ vựng / Vocab</span>
+            </div>
+            <div class="nav-item" onclick="startToneGame()">
+                <span>🔊 Dấu câu / Tones</span>
+            </div>
+        </div>
+
+        <div id="shop-node" class="shop-bar" onclick="openShop()">🏪 Cửa hàng / Shop</div>
+    </div>
+
+    <div id="home-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 id="home-title">Nhà của tôi<br><small>My Home</small></h2>
+
+        <div class="home-view">
+            <div id="home-flag" class="place-flag"></div>
+            <button id="prev-place" class="switch-btn switch-prev" onclick="switchPlace(-1)">⬅</button>
+            <button id="next-place" class="switch-btn switch-next" onclick="switchPlace(1)">➡</button>
+
+            <div class="home-char-wrapper">
+                <span id="home-char-acc" class="char-part char-acc"></span>
+                <span id="home-char-hat" class="char-part" style="top: 10px; font-size: 5rem; z-index: 15;"></span> 
+                <span id="home-char-face" class="char-part" style="top: 65px; font-size: 3rem; z-index: 12;"></span>
+                <span id="home-char-head" class="char-part char-head">👤</span>
+                <span id="home-char-gear" class="char-part" style="top: 150px; margin-left: 80px; font-size: 4rem; z-index: 1;"></span>
+                <span id="home-char-arm-l" class="char-part char-arm-l"></span>
+                <span id="home-char-arm-r" class="char-part char-arm-r"></span>
+                <span id="home-char-body" class="char-part char-body">👕</span>
+                <span id="home-char-legs" class="char-part char-legs">👖</span>
+                <span id="home-char-shoes" class="char-part char-shoes">👟</span>
+            </div>
+
+            <div id="home-place-icon" class="place-bg-icon"></div>
+        </div>
+    </div>
+
+    <div id="shop-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <div class="shop-tabs">
+            <button id="tab-char" class="tab-btn active" onclick="setShopTab('char')">👤 NV <span>Char</span></button>
+            <button id="tab-place" class="tab-btn" onclick="setShopTab('place')">🏛️ Chỗ <span>Place</span></button>
+            <button id="tab-acc" class="tab-btn" onclick="setShopTab('acc')">🎀 Phụ kiện <span>Acc</span></button>
+        </div>
+        <div id="shop-items-container" class="item-list"></div>
+    </div>
+
+    <div id="learn-screen" class="screen">
+        <div id="learn-grid" class="learn-grid"></div>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Làm bài tập (4) / Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-target" id="quiz-emoji"></div>
+        <div id="quiz-options" class="options-grid"></div>
+        <h3 id="quiz-msg" style="color:var(--accent)"></h3>
+    </div>
+
+    <div id="tone-screen" class="screen">
+        <div class="quiz-target" id="tone-mark"></div>
+        <div id="tone-options" class="options-grid"></div>
+        <h3 id="tone-msg" style="color:var(--accent)"></h3>
+    </div>
+</div>
+
+<script>
+    const vocabData = [
+        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
+        { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
+        { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
+        { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
+        { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
+        { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
+        { word:'Cam', en:'Orange', emoji:'🍊' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
+        { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
+        { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
+        { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
+        { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
+        { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
+        { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
+        { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
+        { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
+        { word:'Mặt trời', en:'Sun', emoji:'☀️' }, { word:'Mặt trăng', en:'Moon', emoji:'🌙' }
+    ];
+
+    const toneData = [
+        { name:'Sắc', en:'Rising', mark:'´' },
+        { name:'Huyền', en:'Falling', mark:'`' },
+        { name:'Hỏi', en:'Dipping', mark:'?' },
+        { name:'Ngã', en:'Broken', mark:'~' },
+        { name:'Nặng', en:'Low', mark:'.' }
+    ];
+
+    let points = parseInt(localStorage.getItem('points')) || 0;
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || [];
+    let activePlace = localStorage.getItem('activePlace') || 'vn';
+    let custom = JSON.parse(localStorage.getItem('custom')) || { head:'🐱', arm:'🐾', body:'👗', bodyColor:'pink', shoes:'👟', acc: '', hat: '', face: '', gear: '' };
+    let sessionItems = [];
+
+    function save() {
+        localStorage.setItem('points', points);
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        localStorage.setItem('custom', JSON.stringify(custom));
+        localStorage.setItem('activePlace', activePlace);
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        updateUI();
+    }
+
+    function updateCharacterElements(prefix) {
+        const head = document.getElementById(prefix + '-char-head');
+        const armL = document.getElementById(prefix + '-char-arm-l');
+        const armR = document.getElementById(prefix + '-char-arm-r');
+        const body = document.getElementById(prefix + '-char-body');
+        const legs = document.getElementById(prefix + '-char-legs');
+        const shoes = document.getElementById(prefix + '-char-shoes');
+        const acc = document.getElementById(prefix + '-char-acc');
+        const hat = document.getElementById(prefix + '-char-hat');
+        const face = document.getElementById(prefix + '-char-face');
+        const gear = document.getElementById(prefix + '-char-gear');
+
+        head.innerText = custom.head;
+        armL.innerText = custom.arm;
+        armR.innerText = custom.arm;
+        body.innerText = custom.body;
+        body.style.color = (custom.bodyColor === 'pink' ? '#e91e63' : (custom.bodyColor === 'green' ? '#4CAF50' : '#3498db'));
+        legs.innerText = (custom.body === '👗' || custom.body === '👘' ? '' : '👖');
+        legs.style.color = body.style.color;
+        if(shoes) shoes.innerText = custom.shoes || '👟';
+        if(acc) acc.innerText = custom.acc || '';
+        if(hat) hat.innerText = custom.hat || '';
+        if(face) face.innerText = custom.face || '';
+        if(gear) gear.innerText = custom.gear || '';
+    }
+
+    function switchPlace(dir) {
+        const ownedPlaces = ['paris', 'tokyo', 'vn', 'london', 'ny', 'egypt', 'sydney', 'beijing', 'rio'].filter(p => inventory.includes(p));
+        if (ownedPlaces.length < 2) return;
+        let idx = ownedPlaces.indexOf(activePlace);
+        idx = (idx + dir + ownedPlaces.length) % ownedPlaces.length;
+        activePlace = ownedPlaces[idx];
+        save(); updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('points-val').innerText = points;
+        const ownedPlaces = ['paris', 'tokyo', 'vn', 'london', 'ny', 'egypt', 'sydney', 'beijing', 'rio'].filter(p => inventory.includes(p));
+        const showSwitch = ownedPlaces.length >= 2;
+        if(document.getElementById('prev-place')) document.getElementById('prev-place').style.display = showSwitch ? 'flex' : 'none';
+        if(document.getElementById('next-place')) document.getElementById('next-place').style.display = showSwitch ? 'flex' : 'none';
+
+        updateCharacterElements('map');
+        updateCharacterElements('home');
+
+        const places = {
+            'paris': {e:'🗼', f:'🇫🇷', n:'Paris', en:'Paris'},
+            'tokyo': {e:'🗻', f:'🇯🇵', n:'Tokyo', en:'Tokyo'},
+            'vn': {e:'⛵', f:'🇻🇳', n:'Hạ Long', en:'Ha Long Bay'},
+            'london': {e:'🕚', f:'🇬🇧', n:'London', en:'London'},
+            'ny': {e:'🗽', f:'🇺🇸', n:'New York', en:'New York'},
+            'egypt': {e:'🏜️', f:'🇪🇬', n:'Ai Cập', en:'Egypt'},
+            'sydney': {e:'🎭', f:'🇦🇺', n:'Sydney', en:'Sydney'},
+            'beijing': {e:'🧱', f:'🇨🇳', n:'Bắc Kinh', en:'Beijing'},
+            'rio': {e:'🗿', f:'🇧🇷', n:'Rio', en:'Rio'}
+        };
+
+        if (activePlace && places[activePlace]) {
+            document.getElementById('home-place-icon').innerText = places[activePlace].e;
+            document.getElementById('home-flag').innerText = places[activePlace].f;
+            document.getElementById('home-title').innerHTML = `${places[activePlace].n}<br><small>${places[activePlace].en}</small>`;
+        }
+    }
+
+    let currentTab = 'char';
+    function setShopTab(tab) { currentTab = tab; renderShop(); }
+
+    function renderShop() {
+        const container = document.getElementById('shop-items-container');
+        container.innerHTML = '';
+        let items = [];
+        if (currentTab === 'char') items = [
+            { id:'c1', name:'Mèo Kitty', en:'Kitty', price:0, emoji:'🐱', arm:'🐾', color:'pink', type:'char' },
+            { id:'c2', name:'Ếch Froggy', en:'Froggy', price:200, emoji:'🐸', arm:'🟢', color:'green', type:'char' }
+        ];
+        else if (currentTab === 'place') items = [
+            { id:'paris', name:'Paris', en:'Paris', price:150, emoji:'🗼', type:'place' },
+            { id:'tokyo', name:'Tokyo', en:'Tokyo', price:150, emoji:'🗻', type:'place' },
+            { id:'vn', name:'Hạ Long', en:'Ha Long', price:150, emoji:'⛵', type:'place' }
+        ];
+        else if (currentTab === 'acc') items = [
+            { id:'bow', name:'Nơ đỏ', en:'Red Bow', price:50, emoji:'🎀', type:'acc' },
+            { id:'sun', name:'Kính mát', en:'Sunglasses', price:80, emoji:'😎', type:'face' },
+            { id:'dress_p', name:'Váy hồng', en:'Pink Dress', price:200, emoji:'👗', type:'body', color:'pink' },
+            { id:'suit', name:'Vest', en:'Suit', price:250, emoji:'👔', type:'body', color:'blue' }
+        ];
+
+        items.forEach(item => {
+            const isOwned = (item.price === 0) || inventory.includes(item.id);
+            const card = document.createElement('div');
+            card.className = `item-card ${isOwned ? 'owned' : ''}`;
+            const label = isOwned ? 'Sở hữu / Owned' : item.price + '💎';
+            card.innerHTML = `<span style="font-size:2.5rem;">${item.emoji}</span><br><b>${item.name}</b><br><small>${item.en}</small><br>${label}`;
+            card.onclick = () => {
+                if (isOwned) {
+                    if (item.type === 'char') { custom.head = item.emoji; custom.arm = item.arm; custom.bodyColor = item.color; }
+                    else if (item.type === 'place') activePlace = item.id;
+                    else if (item.type === 'body') { custom.body = item.emoji; if(item.color) custom.bodyColor = item.color; }
+                    else if (item.type === 'acc') custom.acc = (custom.acc === item.emoji ? '' : item.emoji);
+                    save(); updateUI(); renderShop();
+                } else if (points >= item.price) {
+                    points -= item.price; inventory.push(item.id); save(); updateUI(); renderShop();
+                }
+            };
+            container.appendChild(card);
+        });
+    }
+
+    function openShop() { showScreen('shop-screen'); renderShop(); }
+
+    function startVocabSession() {
+        showScreen('learn-screen');
+        sessionItems = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
+        let revealed = 0;
+        sessionItems.forEach(item => {
+            const card = document.createElement('div'); card.className = 'learn-card';
+            card.innerHTML = `<span style="font-size:3rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text learn-text-en">${item.en}</div>`;
+            card.onclick = () => {
+                speak(item.word);
+                if(!card.classList.contains('revealed')){
+                    card.classList.add('revealed'); revealed++;
+                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block';
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    function startVocabQuiz() {
+        showScreen('quiz-screen');
+        let pool = [...sessionItems].sort(() => 0.5 - Math.random());
+        function next() {
+            if (pool.length === 0) {
+                save(); speak('Hoàn thành!');
+                document.getElementById('quiz-msg').innerHTML = 'Hoàn thành! 🎉';
+                setTimeout(() => showScreen('map-screen'), 1500); return;
+            }
+            let t = pool.pop();
+            document.getElementById('quiz-emoji').innerText = t.emoji;
+            document.getElementById('quiz-msg').innerText = '';
+            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 2)].sort(() => 0.5 - Math.random()); 
+            const c = document.getElementById('quiz-options'); c.innerHTML = '';
+            opts.forEach(o => {
+                const b = document.createElement('div'); b.className = 'option-card';
+                b.innerHTML = `<b>${o.word}</b><br><small>${o.en}</small>`;
+                b.onclick = () => {
+                    speak(o.word);
+                    if(o.word === t.word) {
+                        points += 20; save(); updateUI();
+                        document.getElementById('quiz-msg').innerHTML = 'Chính xác! +20 💎';
+                        setTimeout(next, 1200);
+                    }
+                };
+                c.appendChild(b);
+            });
+        }
+        next();
+    }
+
+    function startToneGame() {
+        showScreen('tone-screen');
+        function next() {
+            let t = toneData[Math.floor(Math.random()*toneData.length)];
+            document.getElementById('tone-mark').innerText = t.mark;
+            document.getElementById('tone-msg').innerText = '';
+            const c = document.getElementById('tone-options'); c.innerHTML = '';
+            toneData.forEach(o => {
+                const b = document.createElement('div'); b.className = 'option-card';
+                b.innerHTML = `<b>${o.name}</b><br><small>${o.en}</small>`;
+                b.onclick = () => {
+                    speak(o.name);
+                    if(o.name === t.name) {
+                        points += 20; save(); updateUI();
+                        document.getElementById('tone-msg').innerHTML = 'Đúng rồi! +20 💎';
+                        setTimeout(next, 1200);
+                    }
+                };
+                c.appendChild(b);
+            });
+        }
+        next();
+    }
+
+    function speak(t) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = 'vi-VN';
+        window.speechSynthesis.speak(u);
+    }
+
+    updateUI();
+</script>
+</body>
+</html>

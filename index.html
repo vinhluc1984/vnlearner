@@ -1,0 +1,469 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF4500">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>vnLearner - Trading Card Edition</title>
+    <style>
+        :root {
+            --primary: #FF4500;
+            --secondary: #FFD700;
+            --accent: #008000;
+            --text: #333;
+            --bg: #FFF9E6;
+            --card-gold: #FFD700;
+            --card-silver: #C0C0C0;
+            --card-bronze: #CD7F32;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            color: var(--text);
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; overflow: hidden;
+        }
+
+        .container {
+            background: white; padding: 2rem; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid var(--secondary);
+            text-align: center; max-width: 850px; width: 95%;
+            position: relative; height: 90vh;
+            display: flex; flex-direction: column;
+        }
+
+        h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }
+        h2 { margin: 10px 0; font-size: 1.5rem; }
+        p { margin: 5px 0; }
+        small { display: block; font-size: 0.85rem; color: #666; font-weight: normal; }
+
+        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .active { display: block; }
+
+        .btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
+        .btn:hover { transform: scale(1.05); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-home { background: #4a90e2; color: white; min-width: 250px; }
+        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; }
+
+        .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .trading-card {
+            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+            border: 5px solid var(--card-bronze);
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            aspect-ratio: 2.5 / 3.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .trading-card.rare { border-color: var(--card-silver); box-shadow: 0 0 10px rgba(192,192,192,0.5); }
+        .trading-card.legendary { border-color: var(--card-gold); box-shadow: 0 0 15px rgba(255,215,0,0.6); animation: shimmer 2s infinite; }
+        
+        @keyframes shimmer {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.2) saturate(1.2); }
+            100% { filter: brightness(1); }
+        }
+
+        .card-category { font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .card-image { font-size: 3.5rem; margin: 5px 0; }
+        .card-name { font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 5px; }
+        .card-stats { font-size: 0.7rem; color: #555; background: rgba(0,0,0,0.05); border-radius: 5px; padding: 2px; }
+
+        .game-nav-list {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .nav-item {
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: #fff;
+            border: 3px solid var(--secondary);
+            border-radius: 20px;
+            transition: all 0.2s;
+            width: 70%;
+            box-shadow: 0 4px 0 var(--secondary);
+        }
+        .nav-item:hover { transform: translateY(-3px); box-shadow: 0 7px 0 var(--secondary); background: #fff9e6; }
+        .nav-item:active { transform: translateY(0px); box-shadow: 0 2px 0 var(--secondary); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 30px;
+            text-align: center; position: relative;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 20px; padding: 20px; cursor: pointer; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s; }
+        .learn-card:hover { transform: scale(1.02); background: #fff; }
+        .revealed { border-style: solid; border-color: var(--secondary); background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        .learn-text { display: none; margin-top: 10px; font-weight: bold; color: var(--primary); font-size: 2.2rem; }
+        .revealed .learn-text { display: block; }
+        .learn-text-en { font-size: 1.5rem; color: #666; font-weight: normal; }
+
+        .quiz-target { font-size: 8rem; background: #f8f8f8; width: 200px; height: 200px; line-height: 200px; margin: 20px auto; border-radius: 30px; border: 4px solid #eee; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 500px; margin: 0 auto; }
+        .option-card { background: white; border: 3px solid #eee; border-radius: 20px; padding: 20px; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: all 0.2s; }
+        .option-card:hover { border-color: var(--primary); background: #fff9f0; }
+        .option-card small { font-size: 1.2rem; color: #888; display: block; font-weight: normal; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">🎴 <span id="cards-count">0</span> Cards</div>
+
+    <div id="menu-screen" class="screen active">
+        <h1 style="margin-top: 80px;">vnLearner</h1>
+        <p>Học Tiếng Việt để nhận thẻ bài hiếm!<br><small>Learn Vietnamese to get rare trading cards!</small></p>
+        <div style="margin-top: 40px;">
+            <button class="btn btn-primary" style="font-size: 1.5rem; padding: 1rem 3rem;" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start</button>
+        </div>
+    </div>
+
+    <div id="map-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
+        
+        <div style="margin-top: 40px;">
+            <button class="btn btn-home" onclick="showScreen('collection-screen')">🎴 Bộ sưu tập / My Cards</button>
+        </div>
+
+        <div class="game-nav-list">
+            <div class="nav-item" onclick="startVocabSession()">
+                <span style="font-size: 2rem;">📕</span>
+                <div>
+                    Từ vựng<br><small>Vocabulary</small>
+                </div>
+            </div>
+            <div class="nav-item" onclick="startToneGame()">
+                <span style="font-size: 2rem;">🔊</span>
+                <div>
+                    Dấu câu<br><small>Tones Quiz</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="collection-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bộ sưu tập của tôi<br><small>My Card Collection</small></h2>
+        <div id="card-collection-grid" class="card-grid"></div>
+    </div>
+
+    <div id="learn-screen" class="screen">
+        <h2 id="learn-title">Ghi nhớ từ vựng<br><small>Memorize these words</small></h2>
+        <div id="learn-grid" class="learn-grid"></div>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:20px; width: 100%;" onclick="startVocabQuiz()">📝 Làm bài tập / Start Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-target" id="quiz-emoji"></div>
+        <div id="quiz-options" class="options-grid"></div>
+        <h3 id="quiz-msg" style="min-height: 2rem; margin-top: 20px;"></h3>
+    </div>
+
+    <div id="tone-screen" class="screen">
+        <div class="quiz-target" id="tone-mark" style="font-size: 6rem;"></div>
+        <div id="tone-options" class="options-grid"></div>
+        <h3 id="tone-msg" style="min-height: 2rem; margin-top: 20px;"></h3>
+    </div>
+</div>
+
+<div id="reward-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="color: var(--card-gold)">CHÚC MỪNG! 🎉</h2>
+        <p>Bạn đã nhận được một thẻ bài mới!<br><small>You got a new trading card!</small></p>
+        <div id="reward-card-container" style="display: flex; justify-content: center; margin: 20px 0;"></div>
+        <button class="btn btn-primary" onclick="closeRewardModal()">Tuyệt vời! / Awesome!</button>
+    </div>
+</div>
+
+<script>
+    const pokemonCards = [
+        { id:'p1', name:'Pikachu', cat:'Pokemon', img:'⚡', rarity:'rare', stats:'ATK: 55 | DEF: 40' },
+        { id:'p2', name:'Charizard', cat:'Pokemon', img:'🔥', rarity:'legendary', stats:'ATK: 84 | DEF: 78' },
+        { id:'p3', name:'Bulbasaur', cat:'Pokemon', img:'🍃', rarity:'common', stats:'ATK: 49 | DEF: 49' },
+        { id:'p4', name:'Squirtle', cat:'Pokemon', img:'💧', rarity:'common', stats:'ATK: 48 | DEF: 65' },
+        { id:'p5', name:'Eevee', cat:'Pokemon', img:'🦊', rarity:'rare', stats:'ATK: 55 | DEF: 50' },
+        { id:'p6', name:'Mewtwo', cat:'Pokemon', img:'🔮', rarity:'legendary', stats:'ATK: 110 | DEF: 90' },
+        { id:'p7', name:'Lucario', cat:'Pokemon', img:'👊', rarity:'rare', stats:'ATK: 110 | DEF: 70' },
+        { id:'p8', name:'Gengar', cat:'Pokemon', img:'👻', rarity:'rare', stats:'ATK: 65 | DEF: 60' },
+        { id:'p9', name:'Snorlax', cat:'Pokemon', img:'😴', rarity:'rare', stats:'ATK: 110 | DEF: 65' },
+        { id:'p10', name:'Jigglypuff', cat:'Pokemon', img:'🎤', rarity:'common', stats:'ATK: 45 | DEF: 20' }
+    ];
+
+    const kpopCards = [
+        { id:'k1', name:'Abby Saja', cat:'KDH', img:'🗡️', rarity:'legendary', stats:'Leader | Power: 98' },
+        { id:'k2', name:'Baby Saja', cat:'KDH', img:'👶', rarity:'rare', stats:'Swiftness | Power: 85' },
+        { id:'k3', name:'Bobby', cat:'KDH', img:'🔥', rarity:'rare', stats:'Flame Spirit | Power: 88' },
+        { id:'k4', name:'Celine', cat:'KDH', img:'🎤', rarity:'rare', stats:'Vocal Wave | Power: 87' },
+        { id:'k5', name:'Demon', cat:'KDH', img:'👿', rarity:'legendary', stats:'Darkness | Power: 100' },
+        { id:'k6', name:'Derpy & Sussie', cat:'KDH', img:'🤪', rarity:'common', stats:'Chaos Duo | Power: 75' },
+        { id:'k7', name:'Gwi-Ma', cat:'KDH', img:'👹', rarity:'legendary', stats:'Ancient Terror | Power: 99' },
+        { id:'k8', name:'Healer Han', cat:'KDH', img:'🩹', rarity:'rare', stats:'Life Bloom | Power: 92' },
+        { id:'k9', name:'Jinu', cat:'KDH', img:'⚔️', rarity:'rare', stats:'Dual Blade | Power: 90' },
+        { id:'k10', name:'Mi-yeong Ryu', cat:'KDH', img:'🌸', rarity:'rare', stats:'Blossom Strike | Power: 89' },
+        { id:'k11', name:'Mira', cat:'KDH', img:'🔮', rarity:'rare', stats:'Visionary | Power: 91' },
+        { id:'k12', name:'Mystery Saja', cat:'KDH', img:'🎭', rarity:'legendary', stats:'Unknown | Power: ??' },
+        { id:'k13', name:'Romance Saja', cat:'KDH', img:'💖', rarity:'rare', stats:'Charm | Power: 86' },
+        { id:'k14', name:'Rumi', cat:'KDH', img:'🌙', rarity:'rare', stats:'Moonlight | Power: 93' },
+        { id:'k15', name:'Zoey', cat:'KDH', img:'🏹', rarity:'rare', stats:'Archery | Power: 88' }
+    ];
+
+    const zoopotiaCards = [
+        { id:'z1', name:'Judy Hopps', cat:'Zoopotia', img:'🐰', rarity:'rare', stats:'Police Officer | Speed: 90' },
+        { id:'z2', name:'Nick Wilde', cat:'Zoopotia', img:'🦊', rarity:'rare', stats:'Con Artist | Cunning: 95' },
+        { id:'z3', name:'Chief Bogo', cat:'Zoopotia', img:'🐃', rarity:'common', stats:'Police Chief | Strength: 98' },
+        { id:'z4', name:'Clawhauser', cat:'Zoopotia', img:'🐆', rarity:'common', stats:'Receptionist | Kind: 100' },
+        { id:'z5', name:'Flash', cat:'Zoopotia', img:'🦥', rarity:'rare', stats:'Fastest Sloth | Speed: 1' },
+        { id:'z6', name:'Gazelle', cat:'Zoopotia', img:'🦌', rarity:'legendary', stats:'Pop Star | Influence: 99' },
+        { id:'z7', name:'Mr. Big', cat:'Zoopotia', img:'🐭', rarity:'rare', stats:'Crime Boss | Authority: 100' },
+        { id:'z8', name:'Fru Fru', cat:'Zoopotia', img:'🐁', rarity:'common', stats:'Fashionista | Style: 95' },
+        { id:'z9', name:'Bellwether', cat:'Zoopotia', img:'🐑', rarity:'common', stats:'Assistant Mayor | Plot: 85' },
+        { id:'z10', name:'Yax', cat:'Zoopotia', img:'🐂', rarity:'common', stats:'Naturalist | Chill: 100' }
+    ];
+
+    const marioCards = [
+        { id:'m1', name:'Mario', cat:'Super Mario', img:'🍄', rarity:'legendary', stats:'Hero | Jump: 100' },
+        { id:'m2', name:'Luigi', cat:'Super Mario', img:'🧤', rarity:'rare', stats:'Poltergust | Jump: 110' },
+        { id:'m3', name:'Princess Peach', cat:'Super Mario', img:'👑', rarity:'rare', stats:'Float | Grace: 95' },
+        { id:'m4', name:'Bowser', cat:'Super Mario', img:'🐢', rarity:'legendary', stats:'Fire Breath | STR: 99' },
+        { id:'m5', name:'Yoshi', cat:'Super Mario', img:'🥚', rarity:'rare', stats:'Tongue Lash | Speed: 92' },
+        { id:'m6', name:'Toad', cat:'Super Mario', img:'🍄', rarity:'common', stats:'Support | Courage: 80' },
+        { id:'m7', name:'Wario', cat:'Super Mario', img:'💰', rarity:'rare', stats:'Greed | Weight: 98' },
+        { id:'m8', name:'Waluigi', cat:'Super Mario', img:'💜', rarity:'rare', stats:'Trickery | Agility: 94' },
+        { id:'m9', name:'Rosalina', cat:'Super Mario', img:'✨', rarity:'legendary', stats:'Cosmos | Magic: 97' },
+        { id:'m10', name:'Donkey Kong', cat:'Super Mario', img:'🦍', rarity:'rare', stats:'Barrel Throw | STR: 96' }
+    ];
+
+    const allCards = [...pokemonCards, ...kpopCards, ...zoopotiaCards, ...marioCards];
+
+    const vocabData = [
+        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
+        { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
+        { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
+        { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
+        { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
+        { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
+        { word:'Cam', en:'Orange', emoji:'🍊' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
+        { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
+        { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
+        { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
+        { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
+        { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
+        { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
+        { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
+        { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
+        { word:'Mặt trời', en:'Sun', emoji:'☀️' }, { word:'Mặt trăng', en:'Moon', emoji:'🌙' }
+    ];
+
+    const toneData = [
+        { name:'Sắc', en:'Rising', mark:'´' },
+        { name:'Huyền', en:'Falling', mark:'`' },
+        { name:'Hỏi', en:'Dipping', mark:'?' },
+        { name:'Ngã', en:'Broken', mark:'~' },
+        { name:'Nặng', en:'Low', mark:'.' }
+    ];
+
+    let myCards = JSON.parse(localStorage.getItem('myCards')) || [];
+    let sessionItems = [];
+
+    function save() {
+        localStorage.setItem('myCards', JSON.stringify(myCards));
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        updateUI();
+    }
+
+    function updateUI() {
+        document.getElementById('cards-count').innerText = myCards.length;
+        if(document.getElementById('collection-screen').classList.contains('active')) {
+            renderCollection();
+        }
+    }
+
+    function createCardHTML(card) {
+        return `
+            <div class="trading-card ${card.rarity}">
+                <div class="card-category">${card.cat}</div>
+                <div class="card-image">${card.img}</div>
+                <div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-stats">${card.stats}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderCollection() {
+        const grid = document.getElementById('card-collection-grid');
+        grid.innerHTML = '';
+        if (myCards.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1">Bạn chưa có thẻ nào. Hãy làm bài tập để nhận thẻ!<br><small>No cards yet. Complete quizzes to earn them!</small></p>';
+            return;
+        }
+        myCards.forEach(cardId => {
+            const card = allCards.find(c => c.id === cardId);
+            if(card) {
+                const el = document.createElement('div');
+                el.innerHTML = createCardHTML(card);
+                grid.appendChild(el.firstElementChild);
+            }
+        });
+    }
+
+    function giveRandomCard() {
+        const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
+        myCards.push(randomCard.id);
+        save();
+        
+        const container = document.getElementById('reward-card-container');
+        container.innerHTML = createCardHTML(randomCard);
+        document.getElementById('reward-modal').style.display = 'flex';
+        speak('Bạn nhận được thẻ ' + randomCard.name);
+    }
+
+    function closeRewardModal() {
+        document.getElementById('reward-modal').style.display = 'none';
+        showScreen('map-screen');
+    }
+
+    function startVocabSession() {
+        showScreen('learn-screen');
+        document.getElementById('next-quiz-btn').style.display = 'none';
+        sessionItems = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
+        let revealed = 0;
+        sessionItems.forEach(item => {
+            const card = document.createElement('div'); card.className = 'learn-card';
+            card.innerHTML = `<span style="font-size:3.5rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text learn-text-en">${item.en}</div>`;
+            card.onclick = () => {
+                speak(item.word);
+                if(!card.classList.contains('revealed')){
+                    card.classList.add('revealed'); revealed++;
+                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block';
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    function startVocabQuiz() {
+        showScreen('quiz-screen');
+        let pool = [...sessionItems].sort(() => 0.5 - Math.random());
+        function next() {
+            if (pool.length === 0) {
+                giveRandomCard(); return;
+            }
+            let t = pool.pop();
+            document.getElementById('quiz-emoji').innerText = t.emoji;
+            document.getElementById('quiz-msg').innerText = '';
+            document.getElementById('quiz-msg').style.color = 'var(--text)';
+            
+            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
+            const c = document.getElementById('quiz-options'); c.innerHTML = '';
+            opts.forEach(o => {
+                const b = document.createElement('div'); b.className = 'option-card';
+                b.innerHTML = `<b>${o.word}</b>`;
+                b.onclick = () => {
+                    speak(o.word);
+                    if(o.word === t.word) {
+                        document.getElementById('quiz-msg').innerHTML = '✅ Tuyệt vời! / Great!';
+                        document.getElementById('quiz-msg').style.color = 'var(--accent)';
+                        setTimeout(next, 1000);
+                    } else {
+                        document.getElementById('quiz-msg').innerHTML = '❌ Thử lại nhé! / Try again!';
+                        document.getElementById('quiz-msg').style.color = 'red';
+                    }
+                };
+                c.appendChild(b);
+            });
+        }
+        next();
+    }
+
+    function startToneGame() {
+        showScreen('tone-screen');
+        let count = 0;
+        function next() {
+            if (count === 5) {
+                giveRandomCard(); return;
+            }
+            let t = toneData[Math.floor(Math.random()*toneData.length)];
+            document.getElementById('tone-mark').innerText = t.mark;
+            document.getElementById('tone-msg').innerText = `Câu hỏi ${count + 1}/5`;
+            document.getElementById('tone-msg').style.color = 'var(--text)';
+            
+            const c = document.getElementById('tone-options'); c.innerHTML = '';
+            toneData.forEach(o => {
+                const b = document.createElement('div'); b.className = 'option-card';
+                b.innerHTML = `<b>${o.name}</b>`;
+                b.onclick = () => {
+                    speak(o.name);
+                    if(o.name === t.name) {
+                        count++;
+                        document.getElementById('tone-msg').innerHTML = '✅ Đúng rồi! / Correct!';
+                        document.getElementById('tone-msg').style.color = 'var(--accent)';
+                        setTimeout(next, 1000);
+                    } else {
+                        document.getElementById('tone-msg').innerHTML = '❌ Sai rồi! / Wrong!';
+                        document.getElementById('tone-msg').style.color = 'red';
+                    }
+                };
+                c.appendChild(b);
+            });
+        }
+        next();
+    }
+
+    function speak(t) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(t);
+        u.lang = 'vi-VN';
+        window.speechSynthesis.speak(u);
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
