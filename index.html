@@ -240,21 +240,23 @@
         <h2 style="margin-top: 40px;">Bé tập đọc Tiếng Việt<br><small>Let's Practice Reading!</small></h2>
         
         <div id="reading-level-select" style="margin-top: 20px;">
-            <p>Chọn cấp độ / Choose level:</p>
-            <button class="btn" style="background: #4caf50; color: white; width: 200px;" onclick="initReadingSession('easy')">Dễ / Easy</button><br>
-            <button class="btn" style="background: #ff9800; color: white; width: 200px;" onclick="initReadingSession('medium')">Vừa / Medium</button><br>
-            <button class="btn" style="background: #f44336; color: white; width: 200px;" onclick="initReadingSession('hard')">Khó / Hard</button>
+            <p>Chọn câu chuyện / Choose a story:</p>
+            <button class="btn" style="background: #4caf50; color: white; width: 250px;" onclick="initReadingSession('easy')">Câu chuyện ngắn / Short Story</button><br>
+            <button class="btn" style="background: #ff9800; color: white; width: 250px;" onclick="initReadingSession('medium')">Câu chuyện vừa / Medium Story</button><br>
+            <button class="btn" style="background: #f44336; color: white; width: 250px;" onclick="initReadingSession('hard')">Câu chuyện dài / Long Story</button>
         </div>
 
-        <div id="reading-container" style="display:none; margin-top: 30px;">
-            <div id="reading-text" style="font-size: 2.2rem; background: white; border: 4px solid var(--secondary); border-radius: 20px; padding: 30px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; line-height: 1.4;" onclick="speakCurrentReading()"></div>
-            <p style="color: #666; font-style: italic; min-height: 3rem;" id="reading-en"></p>
+        <div id="reading-container" style="display:none; margin-top: 20px;">
+            <div id="reading-illustration" style="font-size: 6rem; margin-bottom: 10px; animation: popIn 0.5s;"></div>
             
-            <div style="margin-top: 20px;">
-                <button class="btn btn-primary" style="background: #2196f3; width: 100%;" onclick="nextReading()">Tiếp theo / Next ➡️</button>
+            <div id="reading-text" style="font-size: 1.8rem; background: white; border: 4px solid var(--secondary); border-radius: 20px; padding: 25px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); line-height: 1.6; text-align: left;"></div>
+            
+            <p style="color: #666; font-style: italic; min-height: 2rem;" id="reading-en"></p>
+            
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                <button class="btn" style="background: #ff4500; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="speakCurrentReading()">▶ Nghe đọc / Listen</button>
+                <button id="reading-done-btn" class="btn" style="background: #4caf50; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="finishReading()">Xong! / Done! ✅</button>
             </div>
-            
-            <div id="reading-progress" style="margin-top: 20px; font-weight: bold; color: var(--primary);"></div>
         </div>
     </div>
 
@@ -375,33 +377,31 @@
 
     const readingData = {
         easy: [
-            { vi: "Con mèo đang ngủ.", en: "The cat is sleeping." },
-            { vi: "Em bé ăn cơm.", en: "The baby eats rice." },
-            { vi: "Trời đang mưa.", en: "It is raining." },
-            { vi: "Bố đi làm.", en: "Dad goes to work." },
-            { vi: "Mẹ yêu bé.", en: "Mom loves baby." }
+            { vi: "Con mèo nhỏ đang ngủ ngon trên chiếc ghế sofa màu xanh. Nó rất đáng yêu.", en: "The little cat is sleeping soundly on the blue sofa. It is very cute.", img: "🐱" },
+            { vi: "Em bé đang tập đi trong sân nhà. Bố và mẹ vỗ tay cổ vũ cho bé.", en: "The baby is learning to walk in the yard. Mom and Dad clap to cheer.", img: "👶" },
+            { vi: "Vườn hoa của bà có rất nhiều hoa hồng. Mùi hương của chúng rất thơm.", en: "Grandma's flower garden has many roses. Their scent is very fragrant.", img: "🌹" },
+            { vi: "Chú thỏ trắng thích ăn cà rốt giòn. Đôi tai của chú rất dài.", en: "The white rabbit likes eating crunchy carrots. Its ears are very long.", img: "🐰" },
+            { vi: "Con cá vàng bơi lội tung tăng trong bể nước trong xanh. Nó có cái đuôi đẹp.", en: "The goldfish swims around in the clear blue water tank. It has a beautiful tail.", img: "🐠" }
         ],
         medium: [
-            { vi: "Con chim hót trên cành cây.", en: "The bird sings on the tree branch." },
-            { vi: "Bé thích đi chơi công viên.", en: "The baby likes going to the park." },
-            { vi: "Mẹ nấu cơm rất ngon.", en: "Mom cooks very delicious rice." },
-            { vi: "Quả táo có màu đỏ.", en: "The apple is red." },
-            { vi: "Hôm nay trời rất đẹp.", en: "Today the weather is very beautiful." }
+            { vi: "Ông mặt trời thức dậy tỏa ánh sáng ấm áp xuống mặt đất. Chim hót líu lo trên cành.", en: "The sun wakes up and shines warm light on the ground. Birds sing on the branches.", img: "☀️" },
+            { vi: "Cả gia đình em cùng nhau ăn bữa cơm tối vui vẻ. Mẹ nấu món thịt kho rất ngon.", en: "My whole family has a happy dinner together. Mom cooks very delicious braised pork.", img: "🍚" },
+            { vi: "Hôm nay em được đi chơi công viên với bạn bè. Chúng em chơi cầu trượt và xích đu.", en: "Today I got to go to the park with my friends. We played on the slide and swings.", img: "🌳" },
+            { vi: "Mưa mùa hạ rơi tí tách trên mái nhà. Tiếng mưa nghe thật là êm đềm.", en: "Summer rain drops pitter-patter on the roof. The sound of rain is so peaceful.", img: "🌧️" },
+            { vi: "Bầu trời ban đêm có rất nhiều ngôi sao lấp lánh và một vầng trăng khuyết thật đẹp.", en: "The night sky has many twinkling stars and a beautiful crescent moon.", img: "🌙" }
         ],
         hard: [
-            { vi: "Gia đình em cùng nhau ăn tối vui vẻ.", en: "My family has a happy dinner together." },
-            { vi: "Con rùa bò rất chậm trên bãi cát.", en: "The turtle crawls very slowly on the sand." },
-            { vi: "Chúng em học Tiếng Việt mỗi ngày.", en: "We study Vietnamese every day." },
-            { vi: "Bầu trời ban đêm có rất nhiều ngôi sao.", en: "The night sky has many stars." },
-            { vi: "Bé hứa sẽ ngoan ngoãn nghe lời ông bà.", en: "Baby promises to be good and listen to grandparents." }
+            { vi: "Mùa hè này, gia đình em sẽ đi du lịch ở bãi biển Đà Nẵng. Em rất thích tắm biển và xây lâu đài cát.", en: "This summer, my family will travel to Da Nang beach. I love swimming and building sandcastles.", img: "🏖️" },
+            { vi: "Việc học Tiếng Việt giúp em hiểu thêm về văn hóa quê hương. Mỗi ngày em đều dành thời gian để luyện đọc.", en: "Learning Vietnamese helps me understand more about my homeland's culture. Every day I spend time practicing reading.", img: "📖" },
+            { vi: "Em rất yêu thiên nhiên và các loài động vật. Em luôn nhắc nhở mọi người hãy cùng nhau bảo vệ môi trường.", en: "I love nature and animals very much. I always remind everyone to protect the environment together.", img: "🌍" },
+            { vi: "Mỗi khi rảnh rỗi, em thường giúp đỡ ông bà làm việc nhà. Ông bà khen em là một đứa trẻ ngoan ngoãn.", en: "Whenever I am free, I often help my grandparents with housework. They praise me for being a good child.", img: "👴" },
+            { vi: "Em có một ước mơ là trở thành phi hành gia để được bay vào vũ trụ và khám phá những hành tinh mới.", en: "I have a dream of becoming an astronaut to fly into space and discover new planets.", img: "🚀" }
         ]
     };
 
     let myCards = JSON.parse(localStorage.getItem('myCards')) || [];
     let sessionItems = [];
-    let currentReadingLevel = '';
-    let currentReadingIndex = 0;
-    let readingSessionPool = [];
+    let currentStory = null;
 
     function save() { localStorage.setItem('myCards', JSON.stringify(myCards)); }
 
@@ -600,38 +600,37 @@
     }
 
     function initReadingSession(level) {
-        currentReadingLevel = level;
-        currentReadingIndex = 0;
-        readingSessionPool = [...readingData[level]].sort(() => 0.5 - Math.random()).slice(0, 3);
+        const pool = readingData[level];
+        currentStory = pool[Math.floor(Math.random() * pool.length)];
         
         document.getElementById('reading-level-select').style.display = 'none';
         document.getElementById('reading-container').style.display = 'block';
-        updateReadingDisplay();
-    }
-
-    function updateReadingDisplay() {
-        const item = readingSessionPool[currentReadingIndex];
-        document.getElementById('reading-text').innerText = item.vi;
-        document.getElementById('reading-en').innerText = item.en;
-        document.getElementById('reading-progress').innerText = `Câu ${currentReadingIndex + 1} / 3`;
-        speak(item.vi);
+        
+        document.getElementById('reading-illustration').innerText = currentStory.img;
+        document.getElementById('reading-text').innerText = currentStory.vi;
+        document.getElementById('reading-en').innerText = currentStory.en;
+        
+        speakCurrentReading();
     }
 
     function speakCurrentReading() {
-        const text = readingSessionPool[currentReadingIndex].vi;
-        speak(text);
-    }
-
-    function nextReading() {
-        currentReadingIndex++;
-        if (currentReadingIndex >= readingSessionPool.length) {
-            giveRandomCard();
-        } else {
-            updateReadingDisplay();
+        if(currentStory) {
+            speak(currentStory.vi);
         }
     }
 
-    function speak(t) { window.speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.lang = 'vi-VN'; window.speechSynthesis.speak(u); }
+    function finishReading() {
+        giveRandomCard();
+    }
+
+    function speak(t) { 
+        window.speechSynthesis.cancel(); 
+        const u = new SpeechSynthesisUtterance(t); 
+        u.lang = 'vi-VN'; 
+        u.rate = 0.70; // Slower for much better tone clarity
+        u.pitch = 1.1; // Slightly higher for a kid-friendly voice
+        window.speechSynthesis.speak(u); 
+    }
     updateUI();
 </script>
 </body>
