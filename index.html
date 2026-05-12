@@ -450,7 +450,6 @@
 
     function playVideo(id, title) {
         const container = document.getElementById('youtube-container');
-        // Final Focus Fix: Use nocookie, playsinline, and sandbox to prevent app redirection
         const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
         
         container.innerHTML = `
@@ -623,14 +622,31 @@
         giveRandomCard();
     }
 
+    function getBestVNVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        const vnVoices = voices.filter(v => v.lang.includes('vi-VN'));
+        const premium = vnVoices.find(v => v.name.toLowerCase().includes('enhanced') || v.name.toLowerCase().includes('linh'));
+        return premium || vnVoices[0] || null;
+    }
+
     function speak(t) { 
         window.speechSynthesis.cancel(); 
         const u = new SpeechSynthesisUtterance(t); 
         u.lang = 'vi-VN'; 
-        u.rate = 0.70; // Slower for much better tone clarity
-        u.pitch = 1.1; // Slightly higher for a kid-friendly voice
+        
+        const bestVoice = getBestVNVoice();
+        if (bestVoice) u.voice = bestVoice;
+        
+        u.rate = 0.70; 
+        u.pitch = 1.0; 
         window.speechSynthesis.speak(u); 
     }
+    
+    window.speechSynthesis.onvoiceschanged = () => {
+        // Just triggers voice availability check
+        getBestVNVoice();
+    };
+
     updateUI();
 </script>
 </body>
