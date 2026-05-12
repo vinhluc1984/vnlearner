@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
-export default defineConfig({ base: '/vnlearner/',
+export default defineConfig({ 
+  base: process.env.VERCEL ? '/' : '/vnlearner/',
   plugins: [
     react(),
     VitePWA({
