@@ -456,9 +456,9 @@
 
     function playVideo(id, title) {
         const container = document.getElementById('youtube-container');
-        // Removing ALL parameters and extra flags to prevent "Configuration Error"
-        // This is the most compatible version for different environments.
-        const embedUrl = `https://www.youtube.com/embed/${id}`;
+        // Using youtube-nocookie.com often bypasses the iOS "Universal Link" that opens the app.
+        // playsinline=1 forces the video to stay in the web view.
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
         
         container.innerHTML = `
             <iframe 
@@ -468,6 +468,8 @@
                 frameborder="0" 
                 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
                 allowfullscreen 
+                playsinline
+                webkit-playsinline
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             </iframe>`;
             
