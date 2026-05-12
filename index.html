@@ -199,52 +199,6 @@
         .option-card { background: white; border: 3px solid #eee; border-radius: 20px; padding: 20px; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: all 0.2s; }
         .option-card:hover { border-color: var(--primary); background: #fff9f0; }
         .option-card small { font-size: 1.2rem; color: #888; display: block; font-weight: normal; }
-
-        .sentence-display {
-            background: #f8f8f8;
-            border: 3px dashed #ccc;
-            border-radius: 20px;
-            min-height: 80px;
-            margin: 20px 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-        }
-        .word-pool {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .word-chip {
-            background: white;
-            border: 2px solid var(--secondary);
-            border-radius: 15px;
-            padding: 10px 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 0 var(--secondary);
-            transition: all 0.1s;
-        }
-        .word-chip:hover { transform: translateY(-2px); box-shadow: 0 6px 0 var(--secondary); }
-        .word-chip:active { transform: translateY(2px); box-shadow: 0 0px 0 var(--secondary); }
-        .word-chip.used { opacity: 0.3; pointer-events: none; }
-        .slot-word {
-            background: white;
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 8px 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary);
-            animation: popIn 0.3s ease-out;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -274,10 +228,33 @@
                 <span style="font-size: 2rem;">🔊</span>
                 <div>Dấu câu<br><small>Tones Quiz</small></div>
             </div>
-            <div class="nav-item" onclick="startSentenceGame()">
-                <span style="font-size: 2rem;">✍️</span>
-                <div>Ghép câu<br><small>Sentence Builder</small></div>
+            <div class="nav-item" onclick="startReadingGame()">
+                <span style="font-size: 2rem;">📖</span>
+                <div>Luyện đọc<br><small>Practice Reading</small></div>
             </div>
+        </div>
+    </div>
+
+    <div id="reading-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bé tập đọc Tiếng Việt<br><small>Let's Practice Reading!</small></h2>
+        
+        <div id="reading-level-select" style="margin-top: 20px;">
+            <p>Chọn cấp độ / Choose level:</p>
+            <button class="btn" style="background: #4caf50; color: white; width: 200px;" onclick="initReadingSession('easy')">Dễ / Easy</button><br>
+            <button class="btn" style="background: #ff9800; color: white; width: 200px;" onclick="initReadingSession('medium')">Vừa / Medium</button><br>
+            <button class="btn" style="background: #f44336; color: white; width: 200px;" onclick="initReadingSession('hard')">Khó / Hard</button>
+        </div>
+
+        <div id="reading-container" style="display:none; margin-top: 30px;">
+            <div id="reading-text" style="font-size: 2.2rem; background: white; border: 4px solid var(--secondary); border-radius: 20px; padding: 30px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); cursor: pointer; line-height: 1.4;" onclick="speakCurrentReading()"></div>
+            <p style="color: #666; font-style: italic; min-height: 3rem;" id="reading-en"></p>
+            
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" style="background: #2196f3; width: 100%;" onclick="nextReading()">Tiếp theo / Next ➡️</button>
+            </div>
+            
+            <div id="reading-progress" style="margin-top: 20px; font-weight: bold; color: var(--primary);"></div>
         </div>
     </div>
 
@@ -308,16 +285,6 @@
         <div id="tone-mark" class="quiz-target" style="font-size: 6rem;"></div>
         <h3 id="tone-msg" style="min-height: 2rem;"></h3>
         <div id="tone-options" class="options-grid"></div>
-    </div>
-
-    <div id="sentence-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Ghép thành câu đúng<br><small>Build the correct sentence</small></h2>
-        <p id="sentence-en" style="color: #666; font-style: italic;"></p>
-        <div id="sentence-display" class="sentence-display"></div>
-        <div id="word-pool" class="word-pool"></div>
-        <h3 id="sentence-msg" style="min-height: 2rem; margin-top: 20px;"></h3>
-        <button id="sentence-check-btn" class="btn btn-primary" style="display:none; margin-top:20px; width: 100%;" onclick="checkSentence()">Kiểm tra / Check</button>
     </div>
 
     <div id="reward-modal" class="modal-overlay">
@@ -406,8 +373,35 @@
         { name:'Nặng', en:'Low', mark:'.' }
     ];
 
+    const readingData = {
+        easy: [
+            { vi: "Con mèo đang ngủ.", en: "The cat is sleeping." },
+            { vi: "Em bé ăn cơm.", en: "The baby eats rice." },
+            { vi: "Trời đang mưa.", en: "It is raining." },
+            { vi: "Bố đi làm.", en: "Dad goes to work." },
+            { vi: "Mẹ yêu bé.", en: "Mom loves baby." }
+        ],
+        medium: [
+            { vi: "Con chim hót trên cành cây.", en: "The bird sings on the tree branch." },
+            { vi: "Bé thích đi chơi công viên.", en: "The baby likes going to the park." },
+            { vi: "Mẹ nấu cơm rất ngon.", en: "Mom cooks very delicious rice." },
+            { vi: "Quả táo có màu đỏ.", en: "The apple is red." },
+            { vi: "Hôm nay trời rất đẹp.", en: "Today the weather is very beautiful." }
+        ],
+        hard: [
+            { vi: "Gia đình em cùng nhau ăn tối vui vẻ.", en: "My family has a happy dinner together." },
+            { vi: "Con rùa bò rất chậm trên bãi cát.", en: "The turtle crawls very slowly on the sand." },
+            { vi: "Chúng em học Tiếng Việt mỗi ngày.", en: "We study Vietnamese every day." },
+            { vi: "Bầu trời ban đêm có rất nhiều ngôi sao.", en: "The night sky has many stars." },
+            { vi: "Bé hứa sẽ ngoan ngoãn nghe lời ông bà.", en: "Baby promises to be good and listen to grandparents." }
+        ]
+    };
+
     let myCards = JSON.parse(localStorage.getItem('myCards')) || [];
     let sessionItems = [];
+    let currentReadingLevel = '';
+    let currentReadingIndex = 0;
+    let readingSessionPool = [];
 
     function save() { localStorage.setItem('myCards', JSON.stringify(myCards)); }
 
@@ -456,8 +450,7 @@
 
     function playVideo(id, title) {
         const container = document.getElementById('youtube-container');
-        // Using youtube-nocookie.com often bypasses the iOS "Universal Link" that opens the app.
-        // playsinline=1 forces the video to stay in the web view.
+        // Final Focus Fix: Use nocookie, playsinline, and sandbox to prevent app redirection
         const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
         
         container.innerHTML = `
@@ -470,14 +463,11 @@
                 allowfullscreen 
                 playsinline
                 webkit-playsinline
+                sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation allow-presentation"
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
             </iframe>`;
             
-        document.getElementById('video-playing-title').innerHTML = `
-            ${title} 
-            <br><a href="https://www.youtube.com/watch?v=${id}" target="_blank" style="font-size: 0.85rem; color: #4a90e2; text-decoration: underline; margin-top: 5px; display: inline-block;">
-                📺 Xem trên YouTube / Open in YouTube
-            </a>`;
+        document.getElementById('video-playing-title').innerHTML = title;
         document.getElementById('video-player-modal').style.display = 'flex';
     }
 
@@ -603,58 +593,41 @@
         next();
     }
 
-    const nounList = [{ vi: "Em bé", en: "The baby" }, { vi: "Con mèo", en: "The cat" }, { vi: "Bố", en: "Dad" }, { vi: "Mẹ", en: "Mom" }, { vi: "Con chó", en: "The dog" }];
-    const verbList = [{ vi: "đang ăn", en: "is eating" }, { vi: "đang ngủ", en: "is sleeping" }, { vi: "đang chơi", en: "is playing" }, { vi: "đang chạy", en: "is running" }, { vi: "đang uống", en: "is drinking" }];
-    const adverbList = [{ vi: "vui vẻ", en: "happily" }, { vi: "ngon lành", en: "deliciously" }, { vi: "say sưa", en: "soundly" }, { vi: "ngoan ngoãn", en: "obediently" }, { vi: "nhanh nhẹn", en: "quickly" }];
-    let currentSentence = null; let selectedWords = []; let wordPool = [];
-
-    function startSentenceGame() {
-        showScreen('sentence-screen');
-        const noun = nounList[Math.floor(Math.random() * nounList.length)];
-        const verb = verbList[Math.floor(Math.random() * verbList.length)];
-        const adverb = adverbList[Math.floor(Math.random() * adverbList.length)];
-        currentSentence = { target: [noun.vi.trim(), verb.vi.trim(), adverb.vi.trim()], en: `${noun.en} ${verb.en} ${adverb.en}` };
-        wordPool = [...currentSentence.target].sort(() => Math.random() - 0.5);
-        selectedWords = [];
-        document.getElementById('sentence-en').innerText = currentSentence.en;
-        document.getElementById('sentence-msg').innerText = 'Kéo các từ vào ô trống / Drag words to the box';
-        document.getElementById('sentence-msg').style.color = 'var(--text)';
-        document.getElementById('sentence-check-btn').style.display = 'none';
-        renderSentenceGame();
+    function startReadingGame() {
+        showScreen('reading-screen');
+        document.getElementById('reading-level-select').style.display = 'block';
+        document.getElementById('reading-container').style.display = 'none';
     }
 
-    function renderSentenceGame() {
-        const display = document.getElementById('sentence-display');
-        const pool = document.getElementById('word-pool');
-        const checkBtn = document.getElementById('sentence-check-btn');
-        display.innerHTML = '';
-        selectedWords.forEach((word, index) => {
-            const span = document.createElement('span'); span.className = 'slot-word'; span.innerText = word;
-            span.onclick = () => { selectedWords.splice(index, 1); renderSentenceGame(); };
-            display.appendChild(span);
-        });
-        pool.innerHTML = '';
-        wordPool.forEach(word => {
-            const chip = document.createElement('div'); chip.className = 'word-chip';
-            const usedCount = selectedWords.filter(w => w === word).length;
-            const targetCount = currentSentence.target.filter(w => w === word).length;
-            if (usedCount >= targetCount) chip.classList.add('used');
-            else { chip.onclick = () => { speak(word); selectedWords.push(word); renderSentenceGame(); }; }
-            chip.innerText = word; pool.appendChild(chip);
-        });
-        checkBtn.style.display = (selectedWords.length === currentSentence.target.length) ? 'block' : 'none';
+    function initReadingSession(level) {
+        currentReadingLevel = level;
+        currentReadingIndex = 0;
+        readingSessionPool = [...readingData[level]].sort(() => 0.5 - Math.random()).slice(0, 3);
+        
+        document.getElementById('reading-level-select').style.display = 'none';
+        document.getElementById('reading-container').style.display = 'block';
+        updateReadingDisplay();
     }
 
-    function checkSentence() {
-        const isCorrect = selectedWords.join(' ').trim() === currentSentence.target.join(' ').trim();
-        const msg = document.getElementById('sentence-msg');
-        if (isCorrect) {
-            msg.innerHTML = '✅ Tuyệt vời! Bạn giỏi quá!<br><small>Great! You are so good!</small>';
-            msg.style.color = 'var(--accent)'; speak(selectedWords.join(' '));
-            setTimeout(giveRandomCard, 2000);
+    function updateReadingDisplay() {
+        const item = readingSessionPool[currentReadingIndex];
+        document.getElementById('reading-text').innerText = item.vi;
+        document.getElementById('reading-en').innerText = item.en;
+        document.getElementById('reading-progress').innerText = `Câu ${currentReadingIndex + 1} / 3`;
+        speak(item.vi);
+    }
+
+    function speakCurrentReading() {
+        const text = readingSessionPool[currentReadingIndex].vi;
+        speak(text);
+    }
+
+    function nextReading() {
+        currentReadingIndex++;
+        if (currentReadingIndex >= readingSessionPool.length) {
+            giveRandomCard();
         } else {
-            msg.innerHTML = '❌ Chưa đúng rồi, thử lại nhé!<br><small>Not quite right, try again!</small>';
-            msg.style.color = 'red';
+            updateReadingDisplay();
         }
     }
 
