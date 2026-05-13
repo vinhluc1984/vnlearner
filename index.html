@@ -220,6 +220,10 @@
             <button class="btn btn-home" onclick="showScreen('collection-screen')">🎬 Video của tôi / My Videos</button>
         </div>
         <div class="game-nav-list">
+            <div class="nav-item" onclick="startAlphabetPractice()">
+                <span style="font-size: 2rem;">🔤</span>
+                <div>Bảng chữ cái<br><small>Alphabet</small></div>
+            </div>
             <div class="nav-item" onclick="startVocabSession()">
                 <span style="font-size: 2rem;">📕</span>
                 <div>Từ vựng<br><small>Vocabulary</small></div>
@@ -233,6 +237,12 @@
                 <div>Luyện đọc<br><small>Practice Reading</small></div>
             </div>
         </div>
+    </div>
+
+    <div id="alphabet-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bảng chữ cái Tiếng Việt<br><small>Vietnamese Alphabet</small></h2>
+        <div id="alphabet-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 10px;"></div>
     </div>
 
     <div id="reading-screen" class="screen">
@@ -319,10 +329,46 @@
         { id:'v7', name:'Animal Teamwork', cat:'Facts', youtubeId:'aX9dCH8HplM', rarity:'rare', stats:'Source: Nat Geo Kids' },
         { id:'v8', name:'Solar System Facts', cat:'Facts', youtubeId:'mQrlgH97v94', rarity:'common', stats:'Source: Peekaboo Kidz' },
         { id:'v9', name:'The Water Cycle', cat:'Science', youtubeId:'ncORPosDrjI', rarity:'common', stats:'Source: Peekaboo Kidz' },
-        { id:'v10', name:'How to make a paper airplane', cat:'How-to', youtubeId:'veyZNyurlwU', rarity:'common', stats:'Source: Foldable Flight' }
+        { id:'v10', name:'How to make a paper airplane', cat:'How-to', youtubeId:'veyZNyurlwU', rarity:'common', stats:'Source: Foldable Flight' },
+        { id:'v11', name:'Vietnamese Alphabet Song', cat:'Music', youtubeId:'Y8K7xX8P-S0', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v12', name:'Colors in Vietnamese', cat:'Vocab', youtubeId:'M7Wv1Z-G_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v13', name:'Numbers 1-10 Vietnamese', cat:'Numbers', youtubeId:'p7-D6V9e_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v14', name:'Đi Học Cover (Song ngữ Anh Việt)', cat:'Music', youtubeId:'Q4XjimDQuao', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v15', name:'Thằng Cuội Trung Thu', cat:'Music', youtubeId:'_8r2T85vVz0', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v16', name:'Chị ong nâu và em bé', cat:'Music', youtubeId:'PZDnjOn5EII', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v17', name:'Bà Còng Đi Chợ Trời Mưa', cat:'Music', youtubeId:'s6p1ERHjz68', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v18', name:'Đón Trung Thu: Đếm Sao', cat:'Music', youtubeId:'elyyyc0Y8ps', rarity:'legendary', stats:'Source: Tiny Wrist' },
+        { id:'v19', name:'Chú Ếch Con', cat:'Music', youtubeId:'jz_wc4D6y8c', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v20', name:'Cá vàng bơi (Hai vây xinh xinh)', cat:'Music', youtubeId:'tzwWv_WH2f8', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v21', name:'Liên khúc Con chim non', cat:'Music', youtubeId:'TAj63EX3neQ', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v22', name:'Beautiful Vietnamese Lyrics', cat:'Music', youtubeId:'fRTthos_Jr8', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v23', name:'Lý Bảng Chữ Cái Tiếng Việt', cat:'Alphabet', youtubeId:'htAJgefgEmk', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v24', name:'Bài hát ABC Tiếng Việt', cat:'Alphabet', youtubeId:'yqsux6Y1D1M', rarity:'common', stats:'Source: VOI TV' },
+        { id:'v25', name:'Bé Vui Học Vần ON AN', cat:'Phonics', youtubeId:'-hnDASp_iC8', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v26', name:'Ông Trăng Miệng Cười', cat:'Music', youtubeId:'_hGZUNKoE7I', rarity:'rare', stats:'Source: Kids TV' },
+        { id:'v27', name:'Phụ Âm Ghép Tiếng Việt', cat:'Phonics', youtubeId:'jnCfVxD624s', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v28', name:'Bé Vui Học Vần ĂP ÂP', cat:'Phonics', youtubeId:'TdgafWDZK3c', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v29', name:'Bé Vui Học Vần ANG', cat:'Phonics', youtubeId:'ay-i_dkI9V8', rarity:'rare', stats:'Source: Đỗ Tuyết Nhi' }
     ];
 
     const allCards = [...videoCards];
+
+    const alphabetData = "a ă â b c d đ e ê g h i k l m n o ô ơ p q r s t u ư v x y".split(" ");
+
+    function startAlphabetPractice() {
+        showScreen('alphabet-screen');
+        const grid = document.getElementById('alphabet-grid');
+        grid.innerHTML = '';
+        alphabetData.forEach(letter => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.style.fontSize = '2.5rem';
+            btn.style.padding = '15px';
+            btn.innerText = letter;
+            btn.onclick = () => speak(letter);
+            grid.appendChild(btn);
+        });
+    }
 
     const vocabData = [
         { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
@@ -364,7 +410,12 @@
         { word:'Thơm', en:'Kiss', emoji:'💋' }, { word:'Cười', en:'Laugh', emoji:'😄' },
         { word:'Khóc', en:'Cry', emoji:'😢' }, { word:'Vui', en:'Happy', emoji:'😊' },
         { word:'Buồn', en:'Sad', emoji:'☹️' }, { word:'Sợ', en:'Scared', emoji:'😨' },
-        { word:'Nóng', en:'Hot', emoji:'🌡️' }, { word:'Lạnh', en:'Cold', emoji:'❄️' }
+        { word:'Nóng', en:'Hot', emoji:'🌡️' }, { word:'Lạnh', en:'Cold', emoji:'❄️' },
+        { word:'Phở', en:'Pho', emoji:'🍜' }, { word:'Phố', en:'Street', emoji:'🛣️' },
+        { word:'Phim', en:'Movie', emoji:'🎬' }, { word:'Tre', en:'Bamboo', emoji:'🎋' },
+        { word:'Nhớ', en:'Miss', emoji:'🧠' }, { word:'Ghẹ', en:'Sea Crab', emoji:'🦀' },
+        { word:'Nghỉ', en:'Rest', emoji:'🏖️' }, { word:'Quả', en:'Fruit', emoji:'🍎' },
+        { word:'Tỏa', en:'Shine', emoji:'✨' }, { word:'Nghe', en:'Listen', emoji:'👂' }
     ];
 
     const toneData = [
@@ -391,11 +442,12 @@
             { vi: "Bầu trời ban đêm có rất nhiều ngôi sao lấp lánh và một vầng trăng khuyết thật đẹp.", en: "The night sky has many twinkling stars and a beautiful crescent moon.", img: "🌙" }
         ],
         hard: [
-            { vi: "Mùa hè này, gia đình em sẽ đi du lịch ở bãi biển Đà Nẵng. Em rất thích tắm biển và xây lâu đài cát.", en: "This summer, my family will travel to Da Nang beach. I love swimming and building sandcastles.", img: "🏖️" },
-            { vi: "Việc học Tiếng Việt giúp em hiểu thêm về văn hóa quê hương. Mỗi ngày em đều dành thời gian để luyện đọc.", en: "Learning Vietnamese helps me understand more about my homeland's culture. Every day I spend time practicing reading.", img: "📖" },
-            { vi: "Em rất yêu thiên nhiên và các loài động vật. Em luôn nhắc nhở mọi người hãy cùng nhau bảo vệ môi trường.", en: "I love nature and animals very much. I always remind everyone to protect the environment together.", img: "🌍" },
-            { vi: "Mỗi khi rảnh rỗi, em thường giúp đỡ ông bà làm việc nhà. Ông bà khen em là một đứa trẻ ngoan ngoãn.", en: "Whenever I am free, I often help my grandparents with housework. They praise me for being a good child.", img: "👴" },
-            { vi: "Em có một ước mơ là trở thành phi hành gia để được bay vào vũ trụ và khám phá những hành tinh mới.", en: "I have a dream of becoming an astronaut to fly into space and discover new planets.", img: "🚀" }
+            { vi: "Tình cha ấm áp như vầng thái dương. Ngọt ngào như dòng nước tuôn đầu nguồn. Suốt đời vì con gian khổ, ân tình sâu nặng tựa biển khơi.", en: "Father's love is as warm as the sun. As sweet as the water flowing from the source. A lifetime of hardship for his children, his deep affection is like the vast ocean.", img: "👨" },
+            { vi: "Lòng mẹ bao la như biển Thái Bình dạt dào. Tình mẹ tha thiết như dòng suối hiền ngọt ngào. Lời ru êm ái đưa con vào giấc ngủ say.", en: "Mother's heart is as vast as the Pacific Ocean. Mother's love is as earnest as a sweet gentle stream. Her soft lullaby carries me into a deep sleep.", img: "👩" },
+            { vi: "Công cha như núi Thái Sơn, nghĩa mẹ như nước trong nguồn chảy ra. Một lòng thờ mẹ kính cha, cho tròn chữ hiếu mới là đạo con.", en: "Father's merit is like Mount Thai, Mother's devotion is like water flowing from its source. Wholeheartedly honor your mother and respect your father, to fulfill the duty of filial piety.", img: "🙏" },
+            { vi: "Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng.", en: "In the span of a hundred years of human life, talent and destiny are often at odds. Having gone through such great upheavals, the things one witnesses are truly heart-wrenching.", img: "📜" },
+            { vi: "Dữ dội và dịu êm, ồn ào và lặng lẽ. Sông không hiểu nổi mình, sóng tìm ra tận bể. Ôi con sóng ngày xưa, và ngày sau vẫn thế.", en: "Fierce and gentle, noisy and silent. The river cannot understand itself, so the wave seeks the vast sea. Oh, the waves of the past, and those of the future, remain the same.", img: "🌊" },
+            { vi: "Tôi muốn tắt nắng đi cho màu đừng nhạt mất. Tôi muốn buộc gió lại cho hương đừng bay đi. Của ong bướm này đây tuần tháng mật.", en: "I want to turn off the sunlight so the colors won't fade. I want to bind the wind so the fragrance won't fly away. Here is the honeymoon of bees and butterflies.", img: "🐝" }
         ]
     };
 
