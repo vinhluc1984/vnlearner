@@ -53,7 +53,7 @@ const AlphabetMatch: React.FC<Props> = ({ onBack }) => {
     setCurrentItem(randomItem);
 
     // Get 3 random options (including the correct one)
-    let choices = [randomItem];
+    const choices = [randomItem];
     while (choices.length < 3) {
       const randomOption = alphabetData[Math.floor(Math.random() * alphabetData.length)];
       if (!choices.find(c => c.letter === randomOption.letter)) {
@@ -65,6 +65,7 @@ const AlphabetMatch: React.FC<Props> = ({ onBack }) => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     generateLevel();
   }, []);
 

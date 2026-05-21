@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import './App.css';
 import AlphabetMatch from './games/AlphabetMatch';
+import MathQuest from './games/MathQuest';
 
-type GameState = 'MENU' | 'MAP' | 'ALPHABET_MATCH' | 'TONE_QUEST';
+type GameState = 'MENU' | 'MAP' | 'ALPHABET_MATCH' | 'MATH_QUEST' | 'TONE_QUEST';
 
 function App() {
   const [gameState, setGameState] = useState<GameState>('MENU');
@@ -41,6 +42,12 @@ function App() {
               >
                 🔠 Bảng chữ cái
               </div>
+              <div 
+                className="map-node node-active" 
+                onClick={() => setGameState('MATH_QUEST')}
+              >
+                🔢 Toán học
+              </div>
               <div className="map-node node-locked">
                 🔊 Thanh dấu
               </div>
@@ -54,6 +61,12 @@ function App() {
         return (
           <div className="game-container">
             <AlphabetMatch onBack={() => setGameState('MAP')} />
+          </div>
+        );
+      case 'MATH_QUEST':
+        return (
+          <div className="game-container">
+            <MathQuest onBack={() => setGameState('MAP')} />
           </div>
         );
       default:
