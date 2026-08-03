@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF4500">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vnLearner - Mythical Hatchery</title>
+    <title>vnLearner - Mythical Hatchery Edition</title>
     <style>
         :root {
             --primary: #FF4500;
@@ -13,66 +12,162 @@
             --accent: #4CAF50;
             --text: #333;
             --bg: #FFF9E6;
+            --card-gold: #FFD700;
+            --card-silver: #C0C0C0;
+            --card-bronze: #CD7F32;
         }
 
         body {
             margin: 0; padding: 0;
             background-color: var(--bg);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
             color: var(--text);
             display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden;
         }
 
         .container {
-            background: white; padding: 1.5rem; border-radius: 30px;
+            background: white; padding: 2rem; border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid var(--secondary);
-            text-align: center; max-width: 500px; width: 95%;
+            text-align: center; max-width: 850px; width: 95%;
             position: relative; height: 90vh;
             display: flex; flex-direction: column;
         }
 
-        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 5px; }
+        h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }
+        h2 { margin: 10px 0; font-size: 1.5rem; }
+        p { margin: 5px 0; }
+        small { display: block; font-size: 0.85rem; color: #666; font-weight: normal; }
+
+        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
         .active { display: block; }
 
-        .btn { padding: 0.8rem 1.2rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
+        .btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
         .btn:hover { transform: scale(1.05); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--secondary); color: #333; }
-        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 100; cursor: pointer; }
+        .btn-home { background: #4a90e2; color: white; min-width: 250px; }
+        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
 
-        .top-bar { position: absolute; top: 15px; right: 15px; font-weight: bold; color: var(--primary); z-index: 10; display: flex; gap: 10px; }
+        .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; display: flex; gap: 10px; }
 
-        /* --- MONSTER & EGG DISPLAY --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            padding: 10px;
+        }
+        .trading-card {
+            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+            border: 5px solid var(--card-bronze);
+            border-radius: 15px;
+            padding: 10px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            aspect-ratio: 2.5 / 3.5;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .trading-card.rare { border-color: var(--card-silver); box-shadow: 0 0 10px rgba(192,192,192,0.5); }
+        .trading-card.legendary { border-color: var(--card-gold); box-shadow: 0 0 15px rgba(255,215,0,0.6); animation: shimmer 2s infinite; }
+        
+        @keyframes shimmer {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.2) saturate(1.2); }
+            100% { filter: brightness(1); }
+        }
+
+        .card-category { font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .card-image { font-size: 3.5rem; margin: 5px 0; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
+        .card-image img { max-width: 100%; max-height: 100%; object-fit: cover; }
+
+        .card-name { font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 5px; color: #222; }
+        .card-stats { font-size: 0.7rem; color: #555; background: rgba(0,0,0,0.05); border-radius: 5px; padding: 2px; }
+
+        .game-nav-list {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .nav-item {
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 30px;
+            background: #fff;
+            border: 3px solid var(--secondary);
+            border-radius: 20px;
+            transition: all 0.2s;
+            width: 70%;
+            box-shadow: 0 4px 0 var(--secondary);
+        }
+        .nav-item:hover { transform: translateY(-3px); box-shadow: 0 7px 0 var(--secondary); background: #fff9e6; }
+        .nav-item:active { transform: translateY(0px); box-shadow: 0 2px 0 var(--secondary); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: white; padding: 2.5rem; border-radius: 40px;
+            text-align: center; position: relative; max-width: 600px; width: 90%;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 8px solid var(--secondary);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 20px; padding: 20px; cursor: pointer; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s; }
+        .learn-card:hover { transform: scale(1.02); background: #fff; }
+        .revealed { border-style: solid; border-color: var(--secondary); background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        .quiz-target { font-size: 8rem; background: #f8f8f8; width: 200px; height: 200px; line-height: 200px; margin: 20px auto; border-radius: 30px; border: 4px solid #eee; }
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 500px; margin: 0 auto; }
+        .option-card { background: white; border: 3px solid #eee; border-radius: 20px; padding: 20px; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: all 0.2s; }
+        .option-card:hover { border-color: var(--primary); background: #fff9f0; }
+        .option-card small { font-size: 1.2rem; color: #888; display: block; font-weight: normal; }
+
+        /* --- MONSTER & EGG DISPLAY STYLES --- */
         .monster-display {
-            width: 220px; height: 260px;
-            margin: 15px auto; position: relative;
+            width: 200px; height: 240px;
+            margin: 10px auto; position: relative;
             background: #fdfdfd; border-radius: 20px; border: 3px dashed #ddd;
             display: flex; align-items: center; justify-content: center;
             overflow: visible;
         }
 
         .char-part { position: absolute; left: 50%; transform: translateX(-50%); line-height: 1; pointer-events: none; }
-        .char-head { top: 60px; font-size: 7rem; z-index: 5; transition: transform 0.3s; }
-        .char-acc { top: 35px; font-size: 3.5rem; z-index: 10; }
-        .char-skill-effect { top: 20px; font-size: 4rem; z-index: 12; opacity: 0; transition: opacity 0.3s; }
+        .char-head { top: 50px; font-size: 6.5rem; z-index: 5; transition: transform 0.3s; }
+        .char-acc { top: 25px; font-size: 3.5rem; z-index: 10; }
+        .char-skill-effect { top: 10px; font-size: 3.5rem; z-index: 12; opacity: 0; transition: opacity 0.3s; }
 
-        /* --- EGG PROGRESS BAR --- */
         .progress-box { width: 80%; margin: 10px auto; background: #eee; border-radius: 20px; height: 25px; overflow: hidden; border: 2px solid #ccc; position: relative; }
         .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease-in-out; }
         .progress-text { position: absolute; width: 100%; top: 2px; left: 0; font-size: 0.85rem; font-weight: bold; color: #333; }
 
-        /* --- INVENTORY & SKILL CARDS --- */
-        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
-        .card { background: #fff; border: 2px solid #ddd; border-radius: 15px; padding: 10px; cursor: pointer; transition: all 0.2s; }
-        .card:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .card.active-card { border-color: var(--accent); background: #e8f5e9; }
+        .rpg-card { background: #fff; border: 2px solid #ddd; border-radius: 15px; padding: 10px; cursor: pointer; transition: all 0.2s; }
+        .rpg-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .rpg-card.active-card { border-color: var(--accent); background: #e8f5e9; }
 
-        /* --- ANIMATION CLASSES FOR SKILLS --- */
         @keyframes animFly {
             0% { transform: translateX(-50%) translateY(0px); }
-            50% { transform: translateX(-50%) translateY(-35px); }
+            50% { transform: translateX(-50%) translateY(-30px); }
             100% { transform: translateX(-50%) translateY(0px); }
         }
         @keyframes animBicycle {
@@ -90,25 +185,22 @@
         .anim-flying { animation: animFly 1.5s infinite ease-in-out; }
         .anim-bicycle { animation: animBicycle 1s infinite linear; }
         .anim-fire { animation: animFire 0.8s infinite ease-in-out; }
-
-        /* VOCAB GRID */
-        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .learn-card { background: #f9f9f9; border: 2px dashed #ccc; border-radius: 15px; padding: 10px; cursor: pointer; }
-        .revealed { border-style: solid; border-color: var(--secondary); background: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="top-bar">
-        <span>⭐ <span id="xp-val">0</span>/100 XP</span>
+        <span>⭐ <span id="xp-val">0</span>/100 XP</span> | 
+        🎬 <span id="cards-count">0</span> Videos
     </div>
 
-    <!-- MAIN DASHBOARD -->
-    <div id="home-screen" class="screen active">
-        <h1 style="color:var(--primary); margin-top:30px; margin-bottom:5px;">Mythical Hatchery</h1>
-        <p id="monster-status-title" style="margin:0; font-weight:bold;">Your Egg is Growing!</p>
-
+    <!-- MAIN MENU SCREEN -->
+    <div id="menu-screen" class="screen active">
+        <h1 style="margin-top: 30px;">vnLearner</h1>
+        <p>Học Tiếng Việt để nuôi linh thú và nhận video hấp dẫn!<br><small>Learn Vietnamese to raise your mythical pet & earn videos!</small></p>
+        
+        <!-- RPG EGG & MONSTER DISPLAY -->
         <div class="monster-display">
             <span id="char-skill-effect" class="char-part char-skill-effect"></span>
             <span id="char-acc" class="char-part char-acc"></span>
@@ -120,17 +212,46 @@
             <div id="progress-text" class="progress-text">0 / 100 XP to Hatch</div>
         </div>
 
-        <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px; align-items:center;">
-            <button class="btn btn-primary" style="width:85%" onclick="startVocabSession()">📕 Study & Hatch Egg (+10 XP)</button>
-            <button class="btn btn-secondary" style="width:85%" onclick="showScreen('skills-screen')">📜 Skill & Accessories Book</button>
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <button class="btn btn-primary" style="font-size: 1.3rem; padding: 0.8rem 2.5rem;" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start Practice</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="showScreen('skills-screen')">📜 Skill & Accessories</button>
+                <button class="btn btn-home" style="min-width: unset;" onclick="showScreen('collection-screen')">🎬 My Videos</button>
+            </div>
         </div>
     </div>
 
-    <!-- SKILLS & ACCESSORIES SCREEN -->
+    <!-- MAP NAVIGATION SCREEN -->
+    <div id="map-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
+        <div style="margin-top: 40px;">
+            <button class="btn btn-home" onclick="showScreen('collection-screen')">🎬 Video của tôi / My Videos</button>
+        </div>
+        <div class="game-nav-list">
+            <div class="nav-item" onclick="startAlphabetPractice()">
+                <span style="font-size: 2rem;">🔤</span>
+                <div>Bảng chữ cái<br><small>Alphabet</small></div>
+            </div>
+            <div class="nav-item" onclick="startVocabSession()">
+                <span style="font-size: 2rem;">📕</span>
+                <div>Từ vựng<br><small>Vocabulary</small></div>
+            </div>
+            <div class="nav-item" onclick="startToneGame()">
+                <span style="font-size: 2rem;">🔊</span>
+                <div>Dấu câu<br><small>Tones Quiz</small></div>
+            </div>
+            <div class="nav-item" onclick="startReadingGame()">
+                <span style="font-size: 2rem;">📖</span>
+                <div>Luyện đọc<br><small>Practice Reading</small></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKILL & ACCESSORIES BOOK SCREEN -->
     <div id="skills-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('home-screen')">⬅</button>
+        <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
         <h2 style="margin-top:40px; color:var(--primary);">Skill & Accessory Book</h2>
-        <p><small>Tap unlocked cards to perform action or wear item!</small></p>
+        <p><small>Tap unlocked items to interact or wear!</small></p>
 
         <h3>✨ Unlocked Skills</h3>
         <div id="skills-container" class="card-grid"></div>
@@ -139,62 +260,227 @@
         <div id="acc-container" class="card-grid"></div>
     </div>
 
-    <!-- VOCAB STUDY SCREEN -->
-    <div id="learn-screen" class="screen">
-        <h2 style="color:var(--primary);">Learn Vocabulary</h2>
-        <p>Tap cards to reveal Vietnamese words!</p>
-        <div id="learn-grid" class="learn-grid"></div>
-        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Take Quiz for Reward!</button>
+    <!-- ALPHABET PRACTICE SCREEN -->
+    <div id="alphabet-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bảng chữ cái Tiếng Việt<br><small>Vietnamese Alphabet</small></h2>
+        <div id="alphabet-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 10px;"></div>
     </div>
 
-    <!-- QUIZ SCREEN -->
+    <!-- READING PRACTICE SCREEN -->
+    <div id="reading-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bé tập đọc Tiếng Việt<br><small>Let's Practice Reading!</small></h2>
+        
+        <div id="reading-level-select" style="margin-top: 20px;">
+            <p>Chọn câu chuyện / Choose a story:</p>
+            <button class="btn" style="background: #4caf50; color: white; width: 250px;" onclick="initReadingSession('easy')">Câu chuyện ngắn / Short Story</button><br>
+            <button class="btn" style="background: #ff9800; color: white; width: 250px;" onclick="initReadingSession('medium')">Câu chuyện vừa / Medium Story</button><br>
+            <button class="btn" style="background: #f44336; color: white; width: 250px;" onclick="initReadingSession('hard')">Câu chuyện dài / Long Story</button>
+        </div>
+
+        <div id="reading-container" style="display:none; margin-top: 20px;">
+            <div id="reading-illustration" style="font-size: 6rem; margin-bottom: 10px; animation: popIn 0.5s;"></div>
+            <div id="reading-text" style="font-size: 1.8rem; background: white; border: 4px solid var(--secondary); border-radius: 20px; padding: 25px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); line-height: 1.6; text-align: left;"></div>
+            <p style="color: #666; font-style: italic; min-height: 2rem;" id="reading-en"></p>
+            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
+                <button class="btn" style="background: #ff4500; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="speakCurrentReading()">▶ Nghe đọc / Listen</button>
+                <button id="reading-done-btn" class="btn" style="background: #4caf50; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="finishReading()">Xong! / Done! ✅</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MY VIDEO COLLECTION SCREEN -->
+    <div id="collection-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Bộ sưu tập video của tôi<br><small>My Video Collection</small></h2>
+        <div id="card-collection-grid" class="card-grid"></div>
+    </div>
+
+    <!-- VOCABULARY LEARN SCREEN -->
+    <div id="learn-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Học từ vựng mới<br><small>Learn New Vocabulary</small></h2>
+        <p>Nhấn vào các thẻ để nghe và học!<br><small>Tap the cards to hear and learn!</small></p>
+        <div id="learn-grid" class="learn-grid" style="margin-top: 20px;"></div>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:20px; width: 100%;" onclick="startVocabQuiz()">📝 Làm bài tập / Start Quiz</button>
+    </div>
+
+    <!-- VOCABULARY QUIZ SCREEN -->
     <div id="quiz-screen" class="screen">
-        <h2 style="color:var(--primary);">Vocabulary Quiz</h2>
-        <div id="quiz-emoji" style="font-size:5rem; margin:10px;"></div>
-        <div id="quiz-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
-        <h3 id="quiz-msg" style="margin-top:15px; color:var(--accent);"></h3>
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <div id="quiz-emoji" class="quiz-target" style="margin-top: 40px;"></div>
+        <h3 id="quiz-msg" style="min-height: 2rem;"></h3>
+        <div id="quiz-options" class="options-grid"></div>
+    </div>
+
+    <!-- TONE QUIZ SCREEN -->
+    <div id="tone-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Đố vui dấu câu<br><small>Tones Quiz</small></h2>
+        <div id="tone-mark" class="quiz-target" style="font-size: 6rem;"></div>
+        <h3 id="tone-msg" style="min-height: 2rem;"></h3>
+        <div id="tone-options" class="options-grid"></div>
+    </div>
+
+    <!-- VIDEO PLAYER MODAL -->
+    <div id="video-player-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 800px; padding: 1.5rem;">
+            <button class="btn btn-primary" onclick="closeVideoPlayer()" style="margin-bottom: 10px;">⬅ Quay lại / Back</button>
+            <div id="youtube-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; background: #000;"></div>
+            <h3 id="video-playing-title" style="margin-top: 15px; color: var(--primary);"></h3>
+        </div>
     </div>
 </div>
 
 <script>
-    // Vocabulary Data
-    const vocabData = [
-        { word: 'Mèo', en: 'Cat', emoji: '🐱' },
-        { word: 'Rồng', en: 'Dragon', emoji: '🐲' },
-        { word: 'Táo', en: 'Apple', emoji: '🍎' },
-        { word: 'Xe đạp', en: 'Bicycle', emoji: '🚲' },
-        { word: 'Lửa', en: 'Fire', emoji: '🔥' },
-        { word: 'Bay', en: 'Fly', emoji: '✈️' }
+    // --- VIDEO CARDS DATABASE ---
+    const videoCards = [
+        { id:'v1', name:'Your Body\'s Senses', cat:'Science', youtubeId:'r2xP7heE0wk', rarity:'common', stats:'Source: SciShow Kids' },
+        { id:'v2', name:'How Your Eyes Work', cat:'Science', youtubeId:'6WNHyAXIN8c', rarity:'rare', stats:'Source: SciShow Kids' },
+        { id:'v3', name:'How Your Ears Work', cat:'Science', youtubeId:'vKxpbmdPSyk', rarity:'rare', stats:'Source: SciShow Kids' },
+        { id:'v4', name:'All About Volcanoes', cat:'Science', youtubeId:'0U4lOGo593k', rarity:'legendary', stats:'Source: SciShow Kids' },
+        { id:'v5', name:'What Are Glaciers?', cat:'Science', youtubeId:'HhXnRfyUbeQ', rarity:'common', stats:'Source: SciShow Kids' },
+        { id:'v6', name:'Weird But True!', cat:'Facts', youtubeId:'6Xj-Nvsylec', rarity:'legendary', stats:'Source: Nat Geo Kids' },
+        { id:'v7', name:'Animal Teamwork', cat:'Facts', youtubeId:'aX9dCH8HplM', rarity:'rare', stats:'Source: Nat Geo Kids' },
+        { id:'v8', name:'Solar System Facts', cat:'Facts', youtubeId:'mQrlgH97v94', rarity:'common', stats:'Source: Peekaboo Kidz' },
+        { id:'v9', name:'The Water Cycle', cat:'Science', youtubeId:'ncORPosDrjI', rarity:'common', stats:'Source: Peekaboo Kidz' },
+        { id:'v10', name:'How to make a paper airplane', cat:'How-to', youtubeId:'veyZNyurlwU', rarity:'common', stats:'Source: Foldable Flight' },
+        { id:'v11', name:'Vietnamese Alphabet Song', cat:'Music', youtubeId:'Y8K7xX8P-S0', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v12', name:'Colors in Vietnamese', cat:'Vocab', youtubeId:'M7Wv1Z-G_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v13', name:'Numbers 1-10 Vietnamese', cat:'Numbers', youtubeId:'p7-D6V9e_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v14', name:'Đi Học Cover (Song ngữ Anh Việt)', cat:'Music', youtubeId:'Q4XjimDQuao', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v15', name:'Thằng Cuội Trung Thu', cat:'Music', youtubeId:'_8r2T85vVz0', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v16', name:'Chị ong nâu và em bé', cat:'Music', youtubeId:'PZDnjOn5EII', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v17', name:'Bà Còng Đi Chợ Trời Mưa', cat:'Music', youtubeId:'s6p1ERHjz68', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v18', name:'Đón Trung Thu: Đếm Sao', cat:'Music', youtubeId:'elyyyc0Y8ps', rarity:'legendary', stats:'Source: Tiny Wrist' },
+        { id:'v19', name:'Chú Ếch Con', cat:'Music', youtubeId:'jz_wc4D6y8c', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v20', name:'Cá vàng bơi (Hai vây xinh xinh)', cat:'Music', youtubeId:'tzwWv_WH2f8', rarity:'common', stats:'Source: Tiny Wrist' },
+        { id:'v21', name:'Liên khúc Con chim non', cat:'Music', youtubeId:'TAj63EX3neQ', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v22', name:'Beautiful Vietnamese Lyrics', cat:'Music', youtubeId:'fRTthos_Jr8', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v23', name:'Lý Bảng Chữ Cái Tiếng Việt', cat:'Alphabet', youtubeId:'htAJgefgEmk', rarity:'rare', stats:'Source: Tiny Wrist' },
+        { id:'v24', name:'Bài hát ABC Tiếng Việt', cat:'Alphabet', youtubeId:'yqsux6Y1D1M', rarity:'common', stats:'Source: VOI TV' },
+        { id:'v25', name:'Bé Vui Học Vần ON AN', cat:'Phonics', youtubeId:'-hnDASp_iC8', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v26', name:'Ông Trăng Miệng Cười', cat:'Music', youtubeId:'_hGZUNKoE7I', rarity:'rare', stats:'Source: Kids TV' },
+        { id:'v27', name:'Phụ Âm Ghép Tiếng Việt', cat:'Phonics', youtubeId:'jnCfVxD624s', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v28', name:'Bé Vui Học Vần ĂP ÂP', cat:'Phonics', youtubeId:'TdgafWDZK3c', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
+        { id:'v29', name:'Bé Vui Học Vần ANG', cat:'Phonics', youtubeId:'ay-i_dkI9V8', rarity:'rare', stats:'Source: Đỗ Tuyết Nhi' }
     ];
 
-    // Skill & Accessory Definitions
+    const alphabetData = "a ă â b c d đ e ê g h i k l m n o ô ơ p q r s t u ư v x y".split(" ");
+
+    const vocabData = [
+        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
+        { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
+        { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
+        { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
+        { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
+        { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
+        { word:'Cam', en:'Orange', emoji:'🍊' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
+        { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
+        { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
+        { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
+        { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
+        { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
+        { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
+        { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
+        { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
+        { word:'Mặt trời', en:'Sun', emoji:'☀️' }, { word:'Mặt trăng', en:'Moon', emoji:'🌙' },
+        { word:'Bơ', en:'Avocado', emoji:'🥑' }, { word:'Dâu', en:'Strawberry', emoji:'🍓' },
+        { word:'Dưa', en:'Watermelon', emoji:'🍉' }, { word:'Xoài', en:'Mango', emoji:'🥭' },
+        { word:'Cua', en:'Crab', emoji:'🦀' }, { word:'Tôm', en:'Shrimp', emoji:'🦐' },
+        { word:'Khỉ', en:'Monkey', emoji:'🐒' }, { word:'Bò', en:'Cow', emoji:'🐄' },
+        { word:'Chim', en:'Bird', emoji:'🐦' }, { word:'Xe đạp', en:'Bicycle', emoji:'🚲' },
+        { word:'Máy bay', en:'Airplane', emoji:'✈️' }, { word:'Mũ', en:'Hat', emoji:'👒' },
+        { word:'Áo', en:'Shirt', emoji:'👕' }, { word:'Quần', en:'Pants', emoji:'👖' },
+        { word:'Bỉm', en:'Diaper', emoji:'👶' }, { word:'Giầy', en:'Shoes', emoji:'👟' },
+        { word:'Nước', en:'Water', emoji:'💧' }, { word:'Cốc', en:'Glass', emoji:'🥛' },
+        { word:'Thìa', en:'Spoon', emoji:'🥄' }, { word:'Cửa', en:'Door', emoji:'🚪' },
+        { word:'Bàn', en:'Table', emoji:'🪑' }, { word:'Ghế', en:'Chair', emoji:'🪑' },
+        { word:'Giường', en:'Bed', emoji:'🛏️' }, { word:'Lá', en:'Leaf', emoji:'🍃' },
+        { word:'Cây', en:'Tree', emoji:'🌳' }, { word:'Mây', en:'Cloud', emoji:'☁️' },
+        { word:'Mưa', en:'Rain', emoji:'🌧️' }, { word:'Tuyết', en:'Snow', emoji:'❄️' },
+        { word:'Biển', en:'Ocean', emoji:'🌊' }, { word:'Em bé', en:'Baby', emoji:'👶' },
+        { word:'Mẹ', en:'Mommy', emoji:'👩' }, { word:'Bố', en:'Daddy', emoji:'👨' },
+        { word:'Ông', en:'Grandpa', emoji:'👴' }, { word:'Bà', en:'Grandma', emoji:'👵' },
+        { word:'Ăn', en:'Eat', emoji:'🍴' }, { word:'Uống', en:'Drink', emoji:'🥤' },
+        { word:'Đi', en:'Go', emoji:'🚶' }, { word:'Ngủ', en:'Sleep', emoji:'😴' },
+        { word:'Chơi', en:'Play', emoji:'🧸' }, { word:'Ôm', en:'Hug', emoji:'🤗' },
+        { word:'Thơm', en:'Kiss', emoji:'💋' }, { word:'Cười', en:'Laugh', emoji:'😄' },
+        { word:'Khóc', en:'Cry', emoji:'😢' }, { word:'Vui', en:'Happy', emoji:'😊' },
+        { word:'Buồn', en:'Sad', emoji:'☹️' }, { word:'Sợ', en:'Scared', emoji:'😨' },
+        { word:'Nóng', en:'Hot', emoji:'🌡️' }, { word:'Lạnh', en:'Cold', emoji:'❄️' },
+        { word:'Phở', en:'Pho', emoji:'🍜' }, { word:'Phố', en:'Street', emoji:'🛣️' },
+        { word:'Phim', en:'Movie', emoji:'🎬' }, { word:'Tre', en:'Bamboo', emoji:'🎋' },
+        { word:'Nhớ', en:'Miss', emoji:'🧠' }, { word:'Ghẹ', en:'Sea Crab', emoji:'🦀' },
+        { word:'Nghỉ', en:'Rest', emoji:'🏖️' }, { word:'Quả', en:'Fruit', emoji:'🍎' },
+        { word:'Tỏa', en:'Shine', emoji:'✨' }, { word:'Nghe', en:'Listen', emoji:'👂' }
+    ];
+
+    const toneData = [
+        { name:'Sắc', en:'Rising', mark:'´' },
+        { name:'Huyền', en:'Falling', mark:'`' },
+        { name:'Hỏi', en:'Dipping', mark:'?' },
+        { name:'Ngã', en:'Broken', mark:'~' },
+        { name:'Nặng', en:'Low', mark:'.' }
+    ];
+
+    const readingData = {
+        easy: [
+            { vi: "Con mèo nhỏ đang ngủ ngon trên chiếc ghế sofa màu xanh. Nó rất đáng yêu.", en: "The little cat is sleeping soundly on the blue sofa. It is very cute.", img: "🐱" },
+            { vi: "Em bé đang tập đi trong sân nhà. Bố và mẹ vỗ tay cổ vũ cho bé.", en: "The baby is learning to walk in the yard. Mom and Dad clap to cheer.", img: "👶" },
+            { vi: "Vườn hoa của bà có rất nhiều hoa hồng. Mùi hương của chúng rất thơm.", en: "Grandma's flower garden has many roses. Their scent is very fragrant.", img: "🌹" },
+            { vi: "Chú thỏ trắng thích ăn cà rốt giòn. Đôi tai của chú rất dài.", en: "The white rabbit likes eating crunchy carrots. Its ears are very long.", img: "🐰" },
+            { vi: "Con cá vàng bơi lội tung tăng trong bể nước trong xanh. Nó có cái đuôi đẹp.", en: "The goldfish swims around in the clear blue water tank. It has a beautiful tail.", img: "🐠" }
+        ],
+        medium: [
+            { vi: "Ông mặt trời thức dậy tỏa ánh sáng ấm áp xuống mặt đất. Chim hót líu lo trên cành.", en: "The sun wakes up and shines warm light on the ground. Birds sing on the branches.", img: "☀️" },
+            { vi: "Cả gia đình em cùng nhau ăn bữa cơm tối vui vẻ. Mẹ nấu món thịt kho rất ngon.", en: "My whole family has a happy dinner together. Mom cooks very delicious braised pork.", img: "🍚" },
+            { vi: "Hôm nay em được đi chơi công viên với bạn bè. Chúng em chơi cầu trượt và xích đu.", en: "Today I got to go to the park with my friends. We played on the slide and swings.", img: "🌳" },
+            { vi: "Mưa mùa hạ rơi tí tách trên mái nhà. Tiếng mưa nghe thật là êm đềm.", en: "Summer rain drops pitter-patter on the roof. The sound of rain is so peaceful.", img: "🌧️" },
+            { vi: "Bầu trời ban đêm có rất nhiều ngôi sao lấp lánh và một vầng trăng khuyết thật đẹp.", en: "The night sky has many twinkling stars and a beautiful crescent moon.", img: "🌙" }
+        ],
+        hard: [
+            { vi: "Tình cha ấm áp như vầng thái dương. Ngọt ngào như dòng nước tuôn đầu nguồn. Suốt đời vì con gian khổ, ân tình sâu nặng tựa biển khơi.", en: "Father's love is as warm as the sun. As sweet as the water flowing from the source. A lifetime of hardship for his children, his deep affection is like the vast ocean.", img: "👨" },
+            { vi: "Lòng mẹ bao la như biển Thái Bình dạt dào. Tình mẹ tha thiết như dòng suối hiền ngọt ngào. Lời ru êm ái đưa con vào giấc ngủ say.", en: "Mother's heart is as vast as the Pacific Ocean. Mother's love is as earnest as a sweet gentle stream. Her soft lullaby carries me into a deep sleep.", img: "👩" },
+            { vi: "Công cha như núi Thái Sơn, nghĩa mẹ như nước trong nguồn chảy ra. Một lòng thờ mẹ kính cha, cho tròn chữ hiếu mới là đạo con.", en: "Father's merit is like Mount Thai, Mother's devotion is like water flowing from its source. Wholeheartedly honor your mother and respect your father, to fulfill the duty of filial piety.", img: "🙏" },
+            { vi: "Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng.", en: "In the span of a hundred years of human life, talent and destiny are often at odds. Having gone through such great upheavals, the things one witnesses are truly heart-wrenching.", img: "📜" },
+            { vi: "Dữ dội và dịu êm, ồn ào và lặng lẽ. Sông không hiểu nổi mình, sóng tìm ra tận bể. Ôi con sóng ngày xưa, và ngày sau vẫn thế.", en: "Fierce and gentle, noisy and silent. The river cannot understand itself, so the wave seeks the vast sea. Oh, the waves of the past, and those of the future, remain the same.", img: "🌊" },
+            { vi: "Tôi muốn tắt nắng đi cho màu đừng nhạt mất. Tôi muốn buộc gió lại cho hương đừng bay đi. Của ong bướm này đây tuần tháng mật.", en: "I want to turn off the sunlight so the colors won't fade. I want to bind the wind so the fragrance won't fly away. Here is the honeymoon of bees and butterflies.", img: "🐝" }
+        ]
+    };
+
+    // RPG Definitions
     const skillList = [
-        { id: 'fly', name: 'Flying', emoji: '✈️', anim: 'anim-flying', type: 'skill' },
-        { id: 'bicycle', name: 'Riding Bike', emoji: '🚲', anim: 'anim-bicycle', type: 'skill' },
-        { id: 'fire', name: 'Fire Breathing', emoji: '🔥', anim: 'anim-fire', type: 'skill' }
+        { id: 'fly', name: 'Flying', emoji: '✈️', anim: 'anim-flying' },
+        { id: 'bicycle', name: 'Riding Bike', emoji: '🚲', anim: 'anim-bicycle' },
+        { id: 'fire', name: 'Fire Breathing', emoji: '🔥', anim: 'anim-fire' }
     ];
 
     const accList = [
-        { id: 'crown', name: 'Crown', emoji: '👑', type: 'acc' },
-        { id: 'glasses', name: 'Sunglasses', emoji: '🕶️', type: 'acc' },
-        { id: 'bow', name: 'Ribbon', emoji: '🎀', type: 'acc' }
+        { id: 'crown', name: 'Crown', emoji: '👑' },
+        { id: 'glasses', name: 'Sunglasses', emoji: '🕶️' },
+        { id: 'bow', name: 'Ribbon', emoji: '🎀' }
     ];
 
-    // Player State
+    // State Variables
+    let myCards = JSON.parse(localStorage.getItem('myCards')) || [];
     let xp = parseInt(localStorage.getItem('monster_xp')) || 0;
     let isHatched = localStorage.getItem('monster_hatched') === 'true';
-    let unlockedCards = JSON.parse(localStorage.getItem('monster_cards')) || [];
+    let unlockedRpgItems = JSON.parse(localStorage.getItem('monster_cards')) || [];
     let activeSkill = localStorage.getItem('monster_active_skill') || null;
     let activeAcc = localStorage.getItem('monster_active_acc') || null;
 
+    let sessionItems = [];
+    let currentStory = null;
+
     function saveState() {
+        localStorage.setItem('myCards', JSON.stringify(myCards));
         localStorage.setItem('monster_xp', xp);
         localStorage.setItem('monster_hatched', isHatched);
-        localStorage.setItem('monster_cards', JSON.stringify(unlockedCards));
-        if(activeSkill) localStorage.setItem('monster_active_skill', activeSkill);
-        else localStorage.removeItem('monster_active_skill');
-        if(activeAcc) localStorage.setItem('monster_active_acc', activeAcc);
-        else localStorage.removeItem('monster_active_acc');
+        localStorage.setItem('monster_cards', JSON.stringify(unlockedRpgItems));
+        if(activeSkill) localStorage.setItem('monster_active_skill', activeSkill); else localStorage.removeItem('monster_active_skill');
+        if(activeAcc) localStorage.setItem('monster_active_acc', activeAcc); else localStorage.removeItem('monster_active_acc');
     }
 
     function showScreen(id) {
@@ -204,7 +490,9 @@
     }
 
     function updateUI() {
-        // Update XP Bar
+        document.getElementById('cards-count').innerText = myCards.length;
+        
+        // Update Monster/Egg Status
         const displayXp = Math.min(xp, 100);
         document.getElementById('xp-val').innerText = displayXp;
         document.getElementById('progress-bar').style.width = displayXp + '%';
@@ -212,22 +500,17 @@
         const headEl = document.getElementById('char-head');
         const accEl = document.getElementById('char-acc');
         const skillEffectEl = document.getElementById('char-skill-effect');
-        const titleEl = document.getElementById('monster-status-title');
 
         if (!isHatched) {
             headEl.innerText = '🥚';
-            titleEl.innerText = 'Egg Progress: ' + displayXp + '/100 XP';
             document.getElementById('progress-text').innerText = displayXp + ' / 100 XP to Hatch';
         } else {
-            headEl.innerText = '🐲'; // Hatched Cute Dragon!
-            titleEl.innerText = 'Your Mythical Dragon!';
+            headEl.innerText = '🐲';
             document.getElementById('progress-text').innerText = 'Hatched & Fully Evolved! 🎉';
         }
 
-        // Apply Accessories
         accEl.innerText = activeAcc ? (accList.find(a => a.id === activeAcc)?.emoji || '') : '';
 
-        // Apply Animations & Skill Effects
         headEl.className = 'char-part char-head';
         skillEffectEl.style.opacity = '0';
 
@@ -240,20 +523,193 @@
             }
         }
 
-        renderCards();
+        if(document.getElementById('collection-screen').classList.contains('active')) renderCollection();
+        if(document.getElementById('skills-screen').classList.contains('active')) renderRpgBook();
     }
 
-    function renderCards() {
+    // Audio Speech Synthesis
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 0.8;
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    // --- ALPHABET ---
+    function startAlphabetPractice() {
+        showScreen('alphabet-screen');
+        const grid = document.getElementById('alphabet-grid');
+        grid.innerHTML = '';
+        alphabetData.forEach(letter => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.style.fontSize = '2.5rem';
+            btn.style.padding = '15px';
+            btn.innerText = letter;
+            btn.onclick = () => speak(letter);
+            grid.appendChild(btn);
+        });
+    }
+
+    // --- VOCABULARY ---
+    function startVocabSession() {
+        showScreen('learn-screen');
+        sessionItems = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        const grid = document.getElementById('learn-grid'); 
+        grid.innerHTML = '';
+        document.getElementById('next-quiz-btn').style.display = 'none';
+        let revealedCount = 0;
+
+        sessionItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'learn-card';
+            card.innerHTML = `<span style="font-size:3.5rem">${item.emoji}</span><div style="font-size:1.8rem; font-weight:bold; margin-top:10px;">${item.word}</div><small>${item.en}</small>`;
+            card.onclick = () => {
+                speak(item.word);
+                if(!card.classList.contains('revealed')) {
+                    card.classList.add('revealed');
+                    revealedCount++;
+                    if(revealedCount === sessionItems.length) {
+                        document.getElementById('next-quiz-btn').style.display = 'block';
+                    }
+                }
+            };
+            grid.appendChild(card);
+        });
+    }
+
+    function startVocabQuiz() {
+        showScreen('quiz-screen');
+        const target = sessionItems[Math.floor(Math.random() * sessionItems.length)];
+        document.getElementById('quiz-emoji').innerText = target.emoji;
+        document.getElementById('quiz-msg').innerText = 'Chọn từ đúng! (Choose correct word!)';
+        document.getElementById('quiz-msg').style.color = 'var(--text)';
+
+        const options = document.getElementById('quiz-options'); 
+        options.innerHTML = '';
+        
+        sessionItems.forEach(item => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.innerHTML = `${item.word}<small>${item.en}</small>`;
+            btn.onclick = () => {
+                speak(item.word);
+                if(item.word === target.word) {
+                    document.getElementById('quiz-msg').innerText = '🎉 Chính xác! (+10 XP)';
+                    document.getElementById('quiz-msg').style.color = 'var(--accent)';
+                    awardXPAndReward();
+                } else {
+                    document.getElementById('quiz-msg').innerText = '❌ Thử lại nhé!';
+                    document.getElementById('quiz-msg').style.color = 'red';
+                }
+            };
+            options.appendChild(btn);
+        });
+    }
+
+    // --- TONES QUIZ ---
+    function startToneGame() {
+        showScreen('tone-screen');
+        const target = toneData[Math.floor(Math.random() * toneData.length)];
+        document.getElementById('tone-mark').innerText = target.mark;
+        document.getElementById('tone-msg').innerText = 'Đây là dấu gì? (Which tone mark is this?)';
+        document.getElementById('tone-msg').style.color = 'var(--text)';
+
+        const options = document.getElementById('tone-options');
+        options.innerHTML = '';
+        toneData.forEach(t => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.innerHTML = `Dấu ${t.name}<small>${t.en}</small>`;
+            btn.onclick = () => {
+                speak('Dấu ' + t.name);
+                if(t.name === target.name) {
+                    document.getElementById('tone-msg').innerText = '🎉 Đúng rồi! (+10 XP)';
+                    document.getElementById('tone-msg').style.color = 'var(--accent)';
+                    awardXPAndReward();
+                } else {
+                    document.getElementById('tone-msg').innerText = '❌ Chưa đúng!';
+                    document.getElementById('tone-msg').style.color = 'red';
+                }
+            };
+            options.appendChild(btn);
+        });
+    }
+
+    // --- READING PRACTICE ---
+    function startReadingGame() {
+        showScreen('reading-screen');
+        document.getElementById('reading-level-select').style.display = 'block';
+        document.getElementById('reading-container').style.display = 'none';
+    }
+
+    function initReadingSession(level) {
+        const pool = readingData[level];
+        currentStory = pool[Math.floor(Math.random() * pool.length)];
+        
+        document.getElementById('reading-level-select').style.display = 'none';
+        document.getElementById('reading-container').style.display = 'block';
+        document.getElementById('reading-illustration').innerText = currentStory.img;
+        document.getElementById('reading-text').innerText = currentStory.vi;
+        document.getElementById('reading-en').innerText = currentStory.en;
+        speak(currentStory.vi);
+    }
+
+    function speakCurrentReading() {
+        if(currentStory) speak(currentStory.vi);
+    }
+
+    function finishReading() {
+        alert("Xuất sắc lắm! You finished reading!");
+        awardXPAndReward();
+    }
+
+    // --- REWARD & REWARD LOOT SYSTEM ---
+    function awardXPAndReward() {
+        xp += 10;
+        let msgExtra = "";
+
+        if (xp >= 100 && !isHatched) {
+            isHatched = true;
+            alert('🎉 CHÚC MỪNG! Trứng của bạn đã nở thành Rồng Thần! 🐲');
+        }
+
+        // Unlock video cards logic
+        const uncollectedVideos = videoCards.filter(v => !myCards.includes(v.id));
+        if(uncollectedVideos.length > 0 && Math.random() < 0.7) {
+            const newVid = uncollectedVideos[Math.floor(Math.random() * uncollectedVideos.length)];
+            myCards.push(newVid.id);
+            msgExtra += `\n🎬 Unlocked Video: ${newVid.name}!`;
+        }
+
+        // Unlock RPG RPG skills/accessories
+        const rpgPool = [...skillList, ...accList].filter(item => !unlockedRpgItems.includes(item.id));
+        if(rpgPool.length > 0 && Math.random() < 0.5) {
+            const reward = rpgPool[Math.floor(Math.random() * rpgPool.length)];
+            unlockedRpgItems.push(reward.id);
+            msgExtra += `\n✨ Unlocked Item: ${reward.emoji} ${reward.name}!`;
+        }
+
+        saveState();
+        if(msgExtra) alert("🎁 Phần thưởng / Reward:" + msgExtra);
+        setTimeout(() => showScreen('map-screen'), 1200);
+    }
+
+    // --- RPG BOOK RENDER ---
+    function renderRpgBook() {
         const skillsContainer = document.getElementById('skills-container');
         const accContainer = document.getElementById('acc-container');
         skillsContainer.innerHTML = ''; accContainer.innerHTML = '';
 
         skillList.forEach(s => {
-            const owned = unlockedCards.includes(s.id);
+            const owned = unlockedRpgItems.includes(s.id);
             const card = document.createElement('div');
-            card.className = `card ${activeSkill === s.id ? 'active-card' : ''}`;
+            card.className = `rpg-card ${activeSkill === s.id ? 'active-card' : ''}`;
             card.style.opacity = owned ? '1' : '0.4';
-            card.innerHTML = `<span style="font-size:2rem">${s.emoji}</span><br><b>${s.name}</b><br><small>${owned ? (activeSkill === s.id ? 'Active' : 'Perform') : 'Locked'}</small>`;
+            card.innerHTML = `<span style="font-size:2rem">${s.emoji}</span><br><b>${s.name}</b><br><small>${owned ? (activeSkill === s.id ? 'Active' : 'Use') : 'Locked'}</small>`;
             
             if(owned) {
                 card.onclick = () => {
@@ -265,9 +721,9 @@
         });
 
         accList.forEach(a => {
-            const owned = unlockedCards.includes(a.id);
+            const owned = unlockedRpgItems.includes(a.id);
             const card = document.createElement('div');
-            card.className = `card ${activeAcc === a.id ? 'active-card' : ''}`;
+            card.className = `rpg-card ${activeAcc === a.id ? 'active-card' : ''}`;
             card.style.opacity = owned ? '1' : '0.4';
             card.innerHTML = `<span style="font-size:2rem">${a.emoji}</span><br><b>${a.name}</b><br><small>${owned ? (activeAcc === a.id ? 'Equipped' : 'Wear') : 'Locked'}</small>`;
             
@@ -281,74 +737,61 @@
         });
     }
 
-    // --- VOCABULARY & REWARD LOGIC ---
-    let currentSession = [];
-    function startVocabSession() {
-        showScreen('learn-screen');
-        currentSession = vocabData.sort(() => 0.5 - Math.random()).slice(0, 3);
-        const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
-        let revealedCount = 0;
+    // --- VIDEO COLLECTION & PLAYER ---
+    function createCardHTML(card) {
+        const thumbUrl = `https://img.youtube.com/vi/${card.youtubeId}/mqdefault.jpg`;
+        return `
+            <div class="trading-card ${card.rarity}" onclick="playVideo('${card.youtubeId}', '${card.name.replace(/'/g, "\\'")}')">
+                <div class="card-category">${card.cat}</div>
+                <div class="card-image"><img src="${thumbUrl}" alt="${card.name}"></div>
+                <div>
+                    <div class="card-name">${card.name}</div>
+                    <div class="card-stats">${card.stats}</div>
+                </div>
+                <div style="font-size: 0.8rem; color: var(--primary); font-weight: bold; margin-top: 5px;">▶ Xem ngay / Watch</div>
+            </div>
+        `;
+    }
 
-        currentSession.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'learn-card';
-            card.innerHTML = `<span style="font-size:2.5rem">${item.emoji}</span><p style="margin:5px 0;"><b>${item.word}</b></p>`;
-            card.onclick = () => {
-                if(!card.classList.contains('revealed')) {
-                    card.classList.add('revealed');
-                    revealedCount++;
-                    if(revealedCount === currentSession.length) {
-                        document.getElementById('next-quiz-btn').style.display = 'block';
-                    }
-                }
-            };
-            grid.appendChild(card);
+    function renderCollection() {
+        const grid = document.getElementById('card-collection-grid');
+        grid.innerHTML = '';
+        if (myCards.length === 0) {
+            grid.innerHTML = '<p style="grid-column: 1/-1">Bạn chưa có video nào. Hãy làm bài tập để nhận video!<br><small>No videos yet. Complete quizzes to earn them!</small></p>';
+            return;
+        }
+        myCards.forEach(cardId => {
+            const card = videoCards.find(c => c.id === cardId);
+            if(card) {
+                const el = document.createElement('div');
+                el.innerHTML = createCardHTML(card);
+                grid.appendChild(el.firstElementChild);
+            }
         });
     }
 
-    function startVocabQuiz() {
-        showScreen('quiz-screen');
-        const target = currentSession[Math.floor(Math.random() * currentSession.length)];
-        document.getElementById('quiz-emoji').innerText = target.emoji;
-        document.getElementById('quiz-msg').innerText = '';
-
-        const options = document.getElementById('quiz-options'); options.innerHTML = '';
-        currentSession.forEach(o => {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-primary'; btn.style.width = '80%';
-            btn.innerText = o.word;
-            btn.onclick = () => {
-                if(o === target) {
-                    processQuizReward();
-                } else {
-                    document.getElementById('quiz-msg').innerText = '❌ Thử lại! (Try again!)';
-                }
-            };
-            options.appendChild(btn);
-        });
+    function playVideo(id, title) {
+        const container = document.getElementById('youtube-container');
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1&autoplay=1`;
+        
+        container.innerHTML = `
+            <iframe 
+                width="100%" 
+                height="100%" 
+                style="position:absolute; top:0; left:0;"
+                src="${embedUrl}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowfullscreen>
+            </iframe>
+        `;
+        document.getElementById('video-playing-title').innerText = title;
+        document.getElementById('video-player-modal').style.display = 'flex';
     }
 
-    function processQuizReward() {
-        // Award XP
-        xp += 10;
-        if (xp >= 100 && !isHatched) {
-            isHatched = true;
-            alert('🎉 Congratulations! Your Mythical Monster Egg hatched into a Cute Dragon! 🐲');
-        }
-
-        // Random Loot Drop (XP, Skill, or Accessory)
-        const lootPool = [...skillList, ...accList].filter(item => !unlockedCards.includes(item.id));
-        let rewardText = '+10 XP Gained!';
-
-        if (lootPool.length > 0 && Math.random() < 0.6) { // 60% chance to drop new item card
-            const reward = lootPool[Math.floor(Math.random() * lootPool.length)];
-            unlockedCards.push(reward.id);
-            rewardText = `🎉 +10 XP & Unlocked: ${reward.emoji} ${reward.name}!`;
-        }
-
-        saveState();
-        document.getElementById('quiz-msg').innerText = rewardText;
-        setTimeout(() => showScreen('home-screen'), 1800);
+    function closeVideoPlayer() {
+        document.getElementById('youtube-container').innerHTML = '';
+        document.getElementById('video-player-modal').style.display = 'none';
     }
 
     updateUI();
