@@ -48,6 +48,7 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--secondary); color: #333; }
         .btn-home { background: #4a90e2; color: white; min-width: 250px; }
+        .btn-new-egg { background: #9c27b0; color: white; min-width: 200px; }
         .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
 
         .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.1rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; display: flex; gap: 10px; }
@@ -138,6 +139,8 @@
         .revealed { border-style: solid; border-color: var(--secondary); background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 
         .quiz-target { font-size: 8rem; background: #f8f8f8; width: 200px; height: 200px; line-height: 200px; margin: 20px auto; border-radius: 30px; border: 4px solid #eee; }
+        .math-target { font-size: 3.5rem; background: #f8f8f8; width: auto; min-width: 250px; padding: 20px; margin: 20px auto; border-radius: 30px; border: 4px solid #eee; font-weight: bold; color: var(--primary); }
+        
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 500px; margin: 0 auto; }
         .option-card { background: white; border: 3px solid #eee; border-radius: 20px; padding: 20px; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: all 0.2s; }
         .option-card:hover { border-color: var(--primary); background: #fff9f0; }
@@ -191,7 +194,7 @@
 
 <div class="container">
     <div class="top-bar">
-        <span>⭐ <span id="xp-val">0</span>/100 XP</span> | 
+        <span>⭐ <span id="xp-val">0</span>/200 XP</span> | 
         🎬 <span id="cards-count">0</span> Videos
     </div>
 
@@ -209,11 +212,15 @@
 
         <div class="progress-box">
             <div id="progress-bar" class="progress-bar"></div>
-            <div id="progress-text" class="progress-text">0 / 100 XP to Hatch</div>
+            <div id="progress-text" class="progress-text">0 / 200 XP to Hatch</div>
         </div>
 
         <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px; align-items: center;">
             <button class="btn btn-primary" style="font-size: 1.3rem; padding: 0.8rem 2.5rem;" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start Practice</button>
+            
+            <!-- NEW EGG BUTTON (Appears when hatched) -->
+            <button id="btn-new-egg" class="btn btn-new-egg" style="display: none;" onclick="resetToNewEgg()">🥚 Trái trứng mới / New Egg</button>
+
             <div style="display: flex; gap: 10px;">
                 <button class="btn btn-secondary" onclick="showScreen('skills-screen')">📜 Skill & Accessories</button>
                 <button class="btn btn-home" style="min-width: unset;" onclick="showScreen('collection-screen')">🎬 My Videos</button>
@@ -243,6 +250,10 @@
             <div class="nav-item" onclick="startReadingGame()">
                 <span style="font-size: 2rem;">📖</span>
                 <div>Luyện đọc<br><small>Practice Reading</small></div>
+            </div>
+            <div class="nav-item" onclick="startMathGame()">
+                <span style="font-size: 2rem;">🔢</span>
+                <div>Toán học<br><small>Math Quiz (+10 XP)</small></div>
             </div>
         </div>
     </div>
@@ -321,6 +332,15 @@
         <div id="tone-mark" class="quiz-target" style="font-size: 6rem;"></div>
         <h3 id="tone-msg" style="min-height: 2rem;"></h3>
         <div id="tone-options" class="options-grid"></div>
+    </div>
+
+    <!-- MATH QUIZ SCREEN -->
+    <div id="math-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
+        <h2 style="margin-top: 40px;">Học Toán Vui<br><small>Fun Math Quiz (+10 XP)</small></h2>
+        <div id="math-question" class="math-target">? + ? = ?</div>
+        <h3 id="math-msg" style="min-height: 2rem;"></h3>
+        <div id="math-options" class="options-grid"></div>
     </div>
 
     <!-- VIDEO PLAYER MODAL -->
@@ -492,21 +512,24 @@
     function updateUI() {
         document.getElementById('cards-count').innerText = myCards.length;
         
-        // Update Monster/Egg Status
-        const displayXp = Math.min(xp, 100);
+        // Update Monster/Egg Status (MAX XP = 200)
+        const displayXp = Math.min(xp, 200);
         document.getElementById('xp-val').innerText = displayXp;
-        document.getElementById('progress-bar').style.width = displayXp + '%';
+        document.getElementById('progress-bar').style.width = (displayXp / 200 * 100) + '%';
 
         const headEl = document.getElementById('char-head');
         const accEl = document.getElementById('char-acc');
         const skillEffectEl = document.getElementById('char-skill-effect');
+        const newEggBtn = document.getElementById('btn-new-egg');
 
         if (!isHatched) {
             headEl.innerText = '🥚';
-            document.getElementById('progress-text').innerText = displayXp + ' / 100 XP to Hatch';
+            document.getElementById('progress-text').innerText = displayXp + ' / 200 XP to Hatch';
+            newEggBtn.style.display = 'none';
         } else {
             headEl.innerText = '🐲';
             document.getElementById('progress-text').innerText = 'Hatched & Fully Evolved! 🎉';
+            newEggBtn.style.display = 'inline-block';
         }
 
         accEl.innerText = activeAcc ? (accList.find(a => a.id === activeAcc)?.emoji || '') : '';
@@ -525,6 +548,19 @@
 
         if(document.getElementById('collection-screen').classList.contains('active')) renderCollection();
         if(document.getElementById('skills-screen').classList.contains('active')) renderRpgBook();
+    }
+
+    // RESET TO NEW EGG FUNCTION
+    function resetToNewEgg() {
+        if (confirm("Bạn có muốn chọn một quả trứng mới để nuôi không?\nDo you want to get a new egg to raise?")) {
+            xp = 0;
+            isHatched = false;
+            activeSkill = null;
+            activeAcc = null;
+            saveState();
+            updateUI();
+            alert("🥚 Bạn đã nhận một quả trứng mới! Hãy học bài để giúp nó nở nhé!\nYou got a new egg! Complete quizzes to help it hatch!");
+        }
     }
 
     // Audio Speech Synthesis
@@ -639,6 +675,67 @@
         });
     }
 
+    // --- MATH QUIZ GAME ---
+    function startMathGame() {
+        showScreen('math-screen');
+        document.getElementById('math-msg').innerText = 'Hãy tính kết quả! (Calculate the answer!)';
+        document.getElementById('math-msg').style.color = 'var(--text)';
+
+        const mathTypes = ['add', 'subtract', 'multiply'];
+        const chosenType = mathTypes[Math.floor(Math.random() * mathTypes.length)];
+        let num1, num2, answer, operatorSymbol;
+
+        if (chosenType === 'add') {
+            num1 = Math.floor(Math.random() * 20) + 1;
+            num2 = Math.floor(Math.random() * 20) + 1;
+            answer = num1 + num2;
+            operatorSymbol = '+';
+        } else if (chosenType === 'subtract') {
+            num1 = Math.floor(Math.random() * 20) + 10;
+            num2 = Math.floor(Math.random() * num1) + 1;
+            answer = num1 - num2;
+            operatorSymbol = '-';
+        } else {
+            // Single-digit multiplication (1-9)
+            num1 = Math.floor(Math.random() * 9) + 1;
+            num2 = Math.floor(Math.random() * 9) + 1;
+            answer = num1 * num2;
+            operatorSymbol = '×';
+        }
+
+        document.getElementById('math-question').innerText = `${num1} ${operatorSymbol} ${num2} = ?`;
+
+        // Generate choices including correct answer
+        let choices = new Set([answer]);
+        while (choices.size < 4) {
+            let fakeOffset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+            let fakeAns = answer + fakeOffset;
+            if (fakeAns >= 0) choices.add(fakeAns);
+        }
+
+        const choicesArray = Array.from(choices).sort(() => 0.5 - Math.random());
+        const optionsEl = document.getElementById('math-options');
+        optionsEl.innerHTML = '';
+
+        choicesArray.forEach(choice => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.innerText = choice;
+            btn.onclick = () => {
+                speak(choice.toString());
+                if (choice === answer) {
+                    document.getElementById('math-msg').innerText = '🎉 Chính xác! (+10 XP)';
+                    document.getElementById('math-msg').style.color = 'var(--accent)';
+                    awardXPAndReward();
+                } else {
+                    document.getElementById('math-msg').innerText = '❌ Thử lại nhé!';
+                    document.getElementById('math-msg').style.color = 'red';
+                }
+            };
+            optionsEl.appendChild(btn);
+        });
+    }
+
     // --- READING PRACTICE ---
     function startReadingGame() {
         showScreen('reading-screen');
@@ -672,7 +769,7 @@
         xp += 10;
         let msgExtra = "";
 
-        if (xp >= 100 && !isHatched) {
+        if (xp >= 200 && !isHatched) {
             isHatched = true;
             alert('🎉 CHÚC MỪNG! Trứng của bạn đã nở thành Rồng Thần! 🐲');
         }
@@ -685,7 +782,7 @@
             msgExtra += `\n🎬 Unlocked Video: ${newVid.name}!`;
         }
 
-        // Unlock RPG RPG skills/accessories
+        // Unlock RPG skills/accessories
         const rpgPool = [...skillList, ...accList].filter(item => !unlockedRpgItems.includes(item.id));
         if(rpgPool.length > 0 && Math.random() < 0.5) {
             const reward = rpgPool[Math.floor(Math.random() * rpgPool.length)];
