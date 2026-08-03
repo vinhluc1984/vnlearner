@@ -1,461 +1,201 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#FF4500">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>vnLearner - Video Reward Edition</title>
+    <title>vnLearner - Mythical Hatchery</title>
     <style>
         :root {
             --primary: #FF4500;
             --secondary: #FFD700;
-            --accent: #008000;
+            --accent: #4CAF50;
             --text: #333;
             --bg: #FFF9E6;
-            --card-gold: #FFD700;
-            --card-silver: #C0C0C0;
-            --card-bronze: #CD7F32;
         }
 
         body {
             margin: 0; padding: 0;
             background-color: var(--bg);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
             color: var(--text);
             display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden;
         }
 
         .container {
-            background: white; padding: 2rem; border-radius: 30px;
+            background: white; padding: 1.5rem; border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             border: 4px solid var(--secondary);
-            text-align: center; max-width: 850px; width: 95%;
+            text-align: center; max-width: 500px; width: 95%;
             position: relative; height: 90vh;
             display: flex; flex-direction: column;
         }
 
-        h1 { font-size: 2.2rem; color: var(--primary); margin: 0; text-shadow: 2px 2px 0px var(--secondary); }
-        h2 { margin: 10px 0; font-size: 1.5rem; }
-        p { margin: 5px 0; }
-        small { display: block; font-size: 0.85rem; color: #666; font-weight: normal; }
-
-        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 10px; }
+        .screen { display: none; flex-grow: 1; overflow-y: auto; padding: 5px; }
         .active { display: block; }
 
-        .btn { padding: 0.8rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
+        .btn { padding: 0.8rem 1.2rem; font-size: 1.1rem; border: none; border-radius: 50px; cursor: pointer; transition: transform 0.2s; font-weight: bold; margin: 5px; }
         .btn:hover { transform: scale(1.05); }
         .btn-primary { background: var(--primary); color: white; }
-        .btn-home { background: #4a90e2; color: white; min-width: 250px; }
-        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; width: 50px; height: 50px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 20; display: flex; align-items: center; justify-content: center; padding: 0; }
+        .btn-secondary { background: var(--secondary); color: #333; }
+        .btn-back { background: none; border: 2px solid var(--primary); color: var(--primary); width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 10px; left: 10px; z-index: 100; cursor: pointer; }
 
-        .top-bar { position: absolute; top: 15px; right: 15px; font-size: 1.2rem; font-weight: bold; color: var(--primary); background: #fff; padding: 5px 15px; border-radius: 50px; border: 2px solid var(--secondary); z-index: 10; }
+        .top-bar { position: absolute; top: 15px; right: 15px; font-weight: bold; color: var(--primary); z-index: 10; display: flex; gap: 10px; }
 
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-            padding: 10px;
-        }
-        .trading-card {
-            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
-            border: 5px solid var(--card-bronze);
-            border-radius: 15px;
-            padding: 10px;
-            position: relative;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            aspect-ratio: 2.5 / 3.5;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .trading-card.rare { border-color: var(--card-silver); box-shadow: 0 0 10px rgba(192,192,192,0.5); }
-        .trading-card.legendary { border-color: var(--card-gold); box-shadow: 0 0 15px rgba(255,215,0,0.6); animation: shimmer 2s infinite; }
-        
-        @keyframes shimmer {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.2) saturate(1.2); }
-            100% { filter: brightness(1); }
+        /* --- MONSTER & EGG DISPLAY --- */
+        .monster-display {
+            width: 220px; height: 260px;
+            margin: 15px auto; position: relative;
+            background: #fdfdfd; border-radius: 20px; border: 3px dashed #ddd;
+            display: flex; align-items: center; justify-content: center;
+            overflow: visible;
         }
 
-        .card-category { font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .card-image { font-size: 3.5rem; margin: 5px 0; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 10px; }
-        .card-image img { max-width: 100%; max-height: 100%; object-fit: cover; }
+        .char-part { position: absolute; left: 50%; transform: translateX(-50%); line-height: 1; pointer-events: none; }
+        .char-head { top: 60px; font-size: 7rem; z-index: 5; transition: transform 0.3s; }
+        .char-acc { top: 35px; font-size: 3.5rem; z-index: 10; }
+        .char-skill-effect { top: 20px; font-size: 4rem; z-index: 12; opacity: 0; transition: opacity 0.3s; }
 
-        .card-name { font-weight: bold; font-size: 0.9rem; line-height: 1.1; margin-bottom: 5px; color: #222; }
-        .card-stats { font-size: 0.7rem; color: #555; background: rgba(0,0,0,0.05); border-radius: 5px; padding: 2px; }
+        /* --- EGG PROGRESS BAR --- */
+        .progress-box { width: 80%; margin: 10px auto; background: #eee; border-radius: 20px; height: 25px; overflow: hidden; border: 2px solid #ccc; position: relative; }
+        .progress-bar { background: var(--accent); height: 100%; width: 0%; transition: width 0.4s ease-in-out; }
+        .progress-text { position: absolute; width: 100%; top: 2px; left: 0; font-size: 0.85rem; font-weight: bold; color: #333; }
 
-        .game-nav-list {
-            margin-top: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-        .nav-item {
-            font-size: 1.4rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px 30px;
-            background: #fff;
-            border: 3px solid var(--secondary);
-            border-radius: 20px;
-            transition: all 0.2s;
-            width: 70%;
-            box-shadow: 0 4px 0 var(--secondary);
-        }
-        .nav-item:hover { transform: translateY(-3px); box-shadow: 0 7px 0 var(--secondary); background: #fff9e6; }
-        .nav-item:active { transform: translateY(0px); box-shadow: 0 2px 0 var(--secondary); }
+        /* --- INVENTORY & SKILL CARDS --- */
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .card { background: #fff; border: 2px solid #ddd; border-radius: 15px; padding: 10px; cursor: pointer; transition: all 0.2s; }
+        .card:hover { border-color: var(--primary); transform: translateY(-3px); }
+        .card.active-card { border-color: var(--accent); background: #e8f5e9; }
 
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none; justify-content: center; align-items: center;
-            z-index: 100;
+        /* --- ANIMATION CLASSES FOR SKILLS --- */
+        @keyframes animFly {
+            0% { transform: translateX(-50%) translateY(0px); }
+            50% { transform: translateX(-50%) translateY(-35px); }
+            100% { transform: translateX(-50%) translateY(0px); }
         }
-        .modal-content {
-            background: white; padding: 2.5rem; border-radius: 40px;
-            text-align: center; position: relative; max-width: 600px; width: 90%;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 8px solid var(--secondary);
+        @keyframes animBicycle {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            25% { transform: translateX(-40%) rotate(5deg); }
+            75% { transform: translateX(-60%) rotate(-5deg); }
+            100% { transform: translateX(-50%) rotate(0deg); }
         }
-        @keyframes popIn {
-            from { transform: scale(0.5); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        @keyframes animFire {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); filter: drop-shadow(0 0 15px red); }
+            100% { transform: translateX(-50%) scale(1); }
         }
 
-        .card-pack {
-            width: 180px; height: 260px;
-            background: linear-gradient(135deg, #ff4500 0%, #ff8c00 100%);
-            border: 4px solid gold;
-            border-radius: 15px;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 4rem;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: transform 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        .card-pack:hover { transform: scale(1.05) rotate(2deg); }
-        .card-pack::after {
-            content: "PACK";
-            position: absolute;
-            bottom: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
+        .anim-flying { animation: animFly 1.5s infinite ease-in-out; }
+        .anim-bicycle { animation: animBicycle 1s infinite linear; }
+        .anim-fire { animation: animFire 0.8s infinite ease-in-out; }
 
-        .reward-cards-container {
-            display: none;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-            perspective: 1000px;
-        }
-        
-        .revealed-card {
-            animation: revealCard 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-            opacity: 0;
-            transform: translateY(50px) rotateY(90deg);
-        }
-
-        @keyframes revealCard {
-            to { opacity: 1; transform: translateY(0) rotateY(0); }
-        }
-
-        .pack-burst {
-            animation: burst 0.5s ease-out forwards;
-        }
-        @keyframes burst {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); filter: brightness(2); }
-            100% { transform: scale(0); opacity: 0; }
-        }
-
-        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .learn-card { background: #f9f9f9; border: 3px dashed #ccc; border-radius: 20px; padding: 20px; cursor: pointer; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.2s; }
-        .learn-card:hover { transform: scale(1.02); background: #fff; }
-        .revealed { border-style: solid; border-color: var(--secondary); background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-        .learn-text { display: none; margin-top: 10px; font-weight: bold; color: var(--primary); font-size: 2.2rem; }
-        .revealed .learn-text { display: block; }
-        .learn-text-en { font-size: 1.5rem; color: #666; font-weight: normal; }
-
-        .quiz-target { font-size: 8rem; background: #f8f8f8; width: 200px; height: 200px; line-height: 200px; margin: 20px auto; border-radius: 30px; border: 4px solid #eee; }
-        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; max-width: 500px; margin: 0 auto; }
-        .option-card { background: white; border: 3px solid #eee; border-radius: 20px; padding: 20px; cursor: pointer; font-size: 1.8rem; font-weight: bold; transition: all 0.2s; }
-        .option-card:hover { border-color: var(--primary); background: #fff9f0; }
-        .option-card small { font-size: 1.2rem; color: #888; display: block; font-weight: normal; }
+        /* VOCAB GRID */
+        .learn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .learn-card { background: #f9f9f9; border: 2px dashed #ccc; border-radius: 15px; padding: 10px; cursor: pointer; }
+        .revealed { border-style: solid; border-color: var(--secondary); background: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-bar">🎬 <span id="cards-count">0</span> Videos</div>
+    <div class="top-bar">
+        <span>⭐ <span id="xp-val">0</span>/100 XP</span>
+    </div>
 
-    <div id="menu-screen" class="screen active">
-        <h1 style="margin-top: 80px;">vnLearner</h1>
-        <p>Học Tiếng Việt để nhận video giáo dục thú vị!<br><small>Learn Vietnamese to get fun educational videos!</small></p>
-        <div style="margin-top: 40px;">
-            <button class="btn btn-primary" style="font-size: 1.5rem; padding: 1rem 3rem;" onclick="showScreen('map-screen')">🚀 Bắt đầu / Start</button>
+    <!-- MAIN DASHBOARD -->
+    <div id="home-screen" class="screen active">
+        <h1 style="color:var(--primary); margin-top:30px; margin-bottom:5px;">Mythical Hatchery</h1>
+        <p id="monster-status-title" style="margin:0; font-weight:bold;">Your Egg is Growing!</p>
+
+        <div class="monster-display">
+            <span id="char-skill-effect" class="char-part char-skill-effect"></span>
+            <span id="char-acc" class="char-part char-acc"></span>
+            <span id="char-head" class="char-part char-head">🥚</span>
+        </div>
+
+        <div class="progress-box">
+            <div id="progress-bar" class="progress-bar"></div>
+            <div id="progress-text" class="progress-text">0 / 100 XP to Hatch</div>
+        </div>
+
+        <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px; align-items:center;">
+            <button class="btn btn-primary" style="width:85%" onclick="startVocabSession()">📕 Study & Hatch Egg (+10 XP)</button>
+            <button class="btn btn-secondary" style="width:85%" onclick="showScreen('skills-screen')">📜 Skill & Accessories Book</button>
         </div>
     </div>
 
-    <div id="map-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('menu-screen')">⬅</button>
-        <div style="margin-top: 40px;">
-            <button class="btn btn-home" onclick="showScreen('collection-screen')">🎬 Video của tôi / My Videos</button>
-        </div>
-        <div class="game-nav-list">
-            <div class="nav-item" onclick="startAlphabetPractice()">
-                <span style="font-size: 2rem;">🔤</span>
-                <div>Bảng chữ cái<br><small>Alphabet</small></div>
-            </div>
-            <div class="nav-item" onclick="startVocabSession()">
-                <span style="font-size: 2rem;">📕</span>
-                <div>Từ vựng<br><small>Vocabulary</small></div>
-            </div>
-            <div class="nav-item" onclick="startToneGame()">
-                <span style="font-size: 2rem;">🔊</span>
-                <div>Dấu câu<br><small>Tones Quiz</small></div>
-            </div>
-            <div class="nav-item" onclick="startReadingGame()">
-                <span style="font-size: 2rem;">📖</span>
-                <div>Luyện đọc<br><small>Practice Reading</small></div>
-            </div>
-        </div>
+    <!-- SKILLS & ACCESSORIES SCREEN -->
+    <div id="skills-screen" class="screen">
+        <button class="btn btn-back" onclick="showScreen('home-screen')">⬅</button>
+        <h2 style="margin-top:40px; color:var(--primary);">Skill & Accessory Book</h2>
+        <p><small>Tap unlocked cards to perform action or wear item!</small></p>
+
+        <h3>✨ Unlocked Skills</h3>
+        <div id="skills-container" class="card-grid"></div>
+
+        <h3>👑 Accessories</h3>
+        <div id="acc-container" class="card-grid"></div>
     </div>
 
-    <div id="alphabet-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Bảng chữ cái Tiếng Việt<br><small>Vietnamese Alphabet</small></h2>
-        <div id="alphabet-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; padding: 10px;"></div>
-    </div>
-
-    <div id="reading-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Bé tập đọc Tiếng Việt<br><small>Let's Practice Reading!</small></h2>
-        
-        <div id="reading-level-select" style="margin-top: 20px;">
-            <p>Chọn câu chuyện / Choose a story:</p>
-            <button class="btn" style="background: #4caf50; color: white; width: 250px;" onclick="initReadingSession('easy')">Câu chuyện ngắn / Short Story</button><br>
-            <button class="btn" style="background: #ff9800; color: white; width: 250px;" onclick="initReadingSession('medium')">Câu chuyện vừa / Medium Story</button><br>
-            <button class="btn" style="background: #f44336; color: white; width: 250px;" onclick="initReadingSession('hard')">Câu chuyện dài / Long Story</button>
-        </div>
-
-        <div id="reading-container" style="display:none; margin-top: 20px;">
-            <div id="reading-illustration" style="font-size: 6rem; margin-bottom: 10px; animation: popIn 0.5s;"></div>
-            
-            <div id="reading-text" style="font-size: 1.8rem; background: white; border: 4px solid var(--secondary); border-radius: 20px; padding: 25px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); line-height: 1.6; text-align: left;"></div>
-            
-            <p style="color: #666; font-style: italic; min-height: 2rem;" id="reading-en"></p>
-            
-            <div style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
-                <button class="btn" style="background: #ff4500; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="speakCurrentReading()">▶ Nghe đọc / Listen</button>
-                <button id="reading-done-btn" class="btn" style="background: #4caf50; color: white; font-size: 1.5rem; padding: 10px 40px;" onclick="finishReading()">Xong! / Done! ✅</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="collection-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Bộ sưu tập video của tôi<br><small>My Video Collection</small></h2>
-        <div id="card-collection-grid" class="card-grid"></div>
-    </div>
-
+    <!-- VOCAB STUDY SCREEN -->
     <div id="learn-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Học từ vựng mới<br><small>Learn New Vocabulary</small></h2>
-        <p>Nhấn vào các thẻ để nghe và học!<br><small>Tap the cards to hear and learn!</small></p>
-        <div id="learn-grid" class="learn-grid" style="margin-top: 20px;"></div>
-        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:20px; width: 100%;" onclick="startVocabQuiz()">📝 Làm bài tập / Start Quiz</button>
+        <h2 style="color:var(--primary);">Learn Vocabulary</h2>
+        <p>Tap cards to reveal Vietnamese words!</p>
+        <div id="learn-grid" class="learn-grid"></div>
+        <button id="next-quiz-btn" class="btn btn-primary" style="display:none; margin-top:15px;" onclick="startVocabQuiz()">📝 Take Quiz for Reward!</button>
     </div>
 
+    <!-- QUIZ SCREEN -->
     <div id="quiz-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <div id="quiz-emoji" class="quiz-target" style="margin-top: 60px;"></div>
-        <h3 id="quiz-msg" style="min-height: 2rem;"></h3>
-        <div id="quiz-options" class="options-grid"></div>
-    </div>
-
-    <div id="tone-screen" class="screen">
-        <button class="btn btn-back" onclick="showScreen('map-screen')">⬅</button>
-        <h2 style="margin-top: 40px;">Đố vui dấu câu<br><small>Tones Quiz</small></h2>
-        <div id="tone-mark" class="quiz-target" style="font-size: 6rem;"></div>
-        <h3 id="tone-msg" style="min-height: 2rem;"></h3>
-        <div id="tone-options" class="options-grid"></div>
-    </div>
-
-    <div id="reward-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2 id="reward-title" style="color: var(--card-gold)">BẠN NHẬN ĐƯỢC QUÀ! 🎁</h2>
-            <p id="reward-subtitle">Nhấn vào gói quà để mở!<br><small>Tap the pack to open!</small></p>
-            <div id="pack-visual" class="card-pack" onclick="revealPack()">🎬</div>
-            <div id="reward-card-container" class="reward-cards-container"></div>
-            <button id="reward-close-btn" class="btn btn-primary" style="display:none; margin-top:20px;" onclick="closeRewardModal()">Tuyệt vời! / Awesome!</button>
-        </div>
-    </div>
-
-    <div id="video-player-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 800px; padding: 1.5rem;">
-            <button class="btn btn-primary" onclick="closeVideoPlayer()" style="margin-bottom: 10px;">⬅ Quay lại / Back</button>
-            <div id="youtube-container" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; background: #000;"></div>
-            <h3 id="video-playing-title" style="margin-top: 15px; color: var(--primary);"></h3>
-        </div>
+        <h2 style="color:var(--primary);">Vocabulary Quiz</h2>
+        <div id="quiz-emoji" style="font-size:5rem; margin:10px;"></div>
+        <div id="quiz-options" style="display:flex; flex-direction:column; gap:10px; align-items:center;"></div>
+        <h3 id="quiz-msg" style="margin-top:15px; color:var(--accent);"></h3>
     </div>
 </div>
 
 <script>
-    const videoCards = [
-        { id:'v1', name:'Your Body\'s Senses', cat:'Science', youtubeId:'r2xP7heE0wk', rarity:'common', stats:'Source: SciShow Kids' },
-        { id:'v2', name:'How Your Eyes Work', cat:'Science', youtubeId:'6WNHyAXIN8c', rarity:'rare', stats:'Source: SciShow Kids' },
-        { id:'v3', name:'How Your Ears Work', cat:'Science', youtubeId:'vKxpbmdPSyk', rarity:'rare', stats:'Source: SciShow Kids' },
-        { id:'v4', name:'All About Volcanoes', cat:'Science', youtubeId:'0U4lOGo593k', rarity:'legendary', stats:'Source: SciShow Kids' },
-        { id:'v5', name:'What Are Glaciers?', cat:'Science', youtubeId:'HhXnRfyUbeQ', rarity:'common', stats:'Source: SciShow Kids' },
-        { id:'v6', name:'Weird But True!', cat:'Facts', youtubeId:'6Xj-Nvsylec', rarity:'legendary', stats:'Source: Nat Geo Kids' },
-        { id:'v7', name:'Animal Teamwork', cat:'Facts', youtubeId:'aX9dCH8HplM', rarity:'rare', stats:'Source: Nat Geo Kids' },
-        { id:'v8', name:'Solar System Facts', cat:'Facts', youtubeId:'mQrlgH97v94', rarity:'common', stats:'Source: Peekaboo Kidz' },
-        { id:'v9', name:'The Water Cycle', cat:'Science', youtubeId:'ncORPosDrjI', rarity:'common', stats:'Source: Peekaboo Kidz' },
-        { id:'v10', name:'How to make a paper airplane', cat:'How-to', youtubeId:'veyZNyurlwU', rarity:'common', stats:'Source: Foldable Flight' },
-        { id:'v11', name:'Vietnamese Alphabet Song', cat:'Music', youtubeId:'Y8K7xX8P-S0', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v12', name:'Colors in Vietnamese', cat:'Vocab', youtubeId:'M7Wv1Z-G_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v13', name:'Numbers 1-10 Vietnamese', cat:'Numbers', youtubeId:'p7-D6V9e_Xo', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v14', name:'Đi Học Cover (Song ngữ Anh Việt)', cat:'Music', youtubeId:'Q4XjimDQuao', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v15', name:'Thằng Cuội Trung Thu', cat:'Music', youtubeId:'_8r2T85vVz0', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v16', name:'Chị ong nâu và em bé', cat:'Music', youtubeId:'PZDnjOn5EII', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v17', name:'Bà Còng Đi Chợ Trời Mưa', cat:'Music', youtubeId:'s6p1ERHjz68', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v18', name:'Đón Trung Thu: Đếm Sao', cat:'Music', youtubeId:'elyyyc0Y8ps', rarity:'legendary', stats:'Source: Tiny Wrist' },
-        { id:'v19', name:'Chú Ếch Con', cat:'Music', youtubeId:'jz_wc4D6y8c', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v20', name:'Cá vàng bơi (Hai vây xinh xinh)', cat:'Music', youtubeId:'tzwWv_WH2f8', rarity:'common', stats:'Source: Tiny Wrist' },
-        { id:'v21', name:'Liên khúc Con chim non', cat:'Music', youtubeId:'TAj63EX3neQ', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v22', name:'Beautiful Vietnamese Lyrics', cat:'Music', youtubeId:'fRTthos_Jr8', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v23', name:'Lý Bảng Chữ Cái Tiếng Việt', cat:'Alphabet', youtubeId:'htAJgefgEmk', rarity:'rare', stats:'Source: Tiny Wrist' },
-        { id:'v24', name:'Bài hát ABC Tiếng Việt', cat:'Alphabet', youtubeId:'yqsux6Y1D1M', rarity:'common', stats:'Source: VOI TV' },
-        { id:'v25', name:'Bé Vui Học Vần ON AN', cat:'Phonics', youtubeId:'-hnDASp_iC8', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
-        { id:'v26', name:'Ông Trăng Miệng Cười', cat:'Music', youtubeId:'_hGZUNKoE7I', rarity:'rare', stats:'Source: Kids TV' },
-        { id:'v27', name:'Phụ Âm Ghép Tiếng Việt', cat:'Phonics', youtubeId:'jnCfVxD624s', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
-        { id:'v28', name:'Bé Vui Học Vần ĂP ÂP', cat:'Phonics', youtubeId:'TdgafWDZK3c', rarity:'common', stats:'Source: Đỗ Tuyết Nhi' },
-        { id:'v29', name:'Bé Vui Học Vần ANG', cat:'Phonics', youtubeId:'ay-i_dkI9V8', rarity:'rare', stats:'Source: Đỗ Tuyết Nhi' }
-    ];
-
-    const allCards = [...videoCards];
-
-    const alphabetData = "a ă â b c d đ e ê g h i k l m n o ô ơ p q r s t u ư v x y".split(" ");
-
-    function startAlphabetPractice() {
-        showScreen('alphabet-screen');
-        const grid = document.getElementById('alphabet-grid');
-        grid.innerHTML = '';
-        alphabetData.forEach(letter => {
-            const btn = document.createElement('div');
-            btn.className = 'option-card';
-            btn.style.fontSize = '2.5rem';
-            btn.style.padding = '15px';
-            btn.innerText = letter;
-            btn.onclick = () => speak(letter);
-            grid.appendChild(btn);
-        });
-    }
-
+    // Vocabulary Data
     const vocabData = [
-        { word:'Cá', en:'Fish', emoji:'🐟' }, { word:'Gấu', en:'Bear', emoji:'🐻' },
-        { word:'Hổ', en:'Tiger', emoji:'🐯' }, { word:'Voi', en:'Elephant', emoji:'🐘' },
-        { word:'Mèo', en:'Cat', emoji:'🐱' }, { word:'Chó', en:'Dog', emoji:'🐶' },
-        { word:'Gà', en:'Chicken', emoji:'🐔' }, { word:'Vịt', en:'Duck', emoji:'🦆' },
-        { word:'Rùa', en:'Turtle', emoji:'🐢' }, { word:'Thỏ', en:'Rabbit', emoji:'🐰' },
-        { word:'Táo', en:'Apple', emoji:'🍎' }, { word:'Chuối', en:'Banana', emoji:'🍌' },
-        { word:'Cam', en:'Orange', emoji:'🍊' }, { word:'Nho', en:'Grapes', emoji:'🍇' },
-        { word:'Cơm', en:'Rice', emoji:'🍚' }, { word:'Bánh mì', en:'Bread', emoji:'🥖' },
-        { word:'Trứng', en:'Egg', emoji:'🥚' }, { word:'Sữa', en:'Milk', emoji:'🥛' },
-        { word:'Mắt', en:'Eye', emoji:'👁️' }, { word:'Tay', en:'Hand', emoji:'✋' },
-        { word:'Chân', en:'Foot', emoji:'🦶' }, { word:'Tai', en:'Ear', emoji:'👂' },
-        { word:'Mũi', en:'Nose', emoji:'👃' }, { word:'Miệng', en:'Mouth', emoji:'👄' },
-        { word:'Banh', en:'Ball', emoji:'⚽' }, { word:'Sách', en:'Book', emoji:'📖' },
-        { word:'Bút', en:'Pen', emoji:'🖊️' }, { word:'Nhà', en:'House', emoji:'🏠' },
-        { word:'Xe', en:'Car', emoji:'🚗' }, { word:'Hoa', en:'Flower', emoji:'🌸' },
-        { word:'Mặt trời', en:'Sun', emoji:'☀️' }, { word:'Mặt trăng', en:'Moon', emoji:'🌙' },
-        { word:'Bơ', en:'Avocado', emoji:'🥑' }, { word:'Dâu', en:'Strawberry', emoji:'🍓' },
-        { word:'Dưa', en:'Watermelon', emoji:'🍉' }, { word:'Xoài', en:'Mango', emoji:'🥭' },
-        { word:'Cua', en:'Crab', emoji:'🦀' }, { word:'Tôm', en:'Shrimp', emoji:'🦐' },
-        { word:'Khỉ', en:'Monkey', emoji:'🐒' }, { word:'Bò', en:'Cow', emoji:'🐄' },
-        { word:'Chim', en:'Bird', emoji:'🐦' }, { word:'Xe đạp', en:'Bicycle', emoji:'🚲' },
-        { word:'Máy bay', en:'Airplane', emoji:'✈️' }, { word:'Mũ', en:'Hat', emoji:'👒' },
-        { word:'Áo', en:'Shirt', emoji:'👕' }, { word:'Quần', en:'Pants', emoji:'👖' },
-        { word:'Bỉm', en:'Diaper', emoji:'👶' }, { word:'Giầy', en:'Shoes', emoji:'👟' },
-        { word:'Nước', en:'Water', emoji:'💧' }, { word:'Cốc', en:'Glass', emoji:'🥛' },
-        { word:'Thìa', en:'Spoon', emoji:'🥄' }, { word:'Cửa', en:'Door', emoji:'🚪' },
-        { word:'Bàn', en:'Table', emoji:'🪑' }, { word:'Ghế', en:'Chair', emoji:'🪑' },
-        { word:'Giường', en:'Bed', emoji:'🛏️' }, { word:'Lá', en:'Leaf', emoji:'🍃' },
-        { word:'Cây', en:'Tree', emoji:'🌳' }, { word:'Mây', en:'Cloud', emoji:'☁️' },
-        { word:'Mưa', en:'Rain', emoji:'🌧️' }, { word:'Tuyết', en:'Snow', emoji:'❄️' },
-        { word:'Biển', en:'Ocean', emoji:'🌊' }, { word:'Em bé', en:'Baby', emoji:'👶' },
-        { word:'Mẹ', en:'Mommy', emoji:'👩' }, { word:'Bố', en:'Daddy', emoji:'👨' },
-        { word:'Ông', en:'Grandpa', emoji:'👴' }, { word:'Bà', en:'Grandma', emoji:'👵' },
-        { word:'Ăn', en:'Eat', emoji:'🍴' }, { word:'Uống', en:'Drink', emoji:'🥤' },
-        { word:'Đi', en:'Go', emoji:'🚶' }, { word:'Ngủ', en:'Sleep', emoji:'😴' },
-        { word:'Chơi', en:'Play', emoji:'🧸' }, { word:'Ôm', en:'Hug', emoji:'🤗' },
-        { word:'Thơm', en:'Kiss', emoji:'💋' }, { word:'Cười', en:'Laugh', emoji:'😄' },
-        { word:'Khóc', en:'Cry', emoji:'😢' }, { word:'Vui', en:'Happy', emoji:'😊' },
-        { word:'Buồn', en:'Sad', emoji:'☹️' }, { word:'Sợ', en:'Scared', emoji:'😨' },
-        { word:'Nóng', en:'Hot', emoji:'🌡️' }, { word:'Lạnh', en:'Cold', emoji:'❄️' },
-        { word:'Phở', en:'Pho', emoji:'🍜' }, { word:'Phố', en:'Street', emoji:'🛣️' },
-        { word:'Phim', en:'Movie', emoji:'🎬' }, { word:'Tre', en:'Bamboo', emoji:'🎋' },
-        { word:'Nhớ', en:'Miss', emoji:'🧠' }, { word:'Ghẹ', en:'Sea Crab', emoji:'🦀' },
-        { word:'Nghỉ', en:'Rest', emoji:'🏖️' }, { word:'Quả', en:'Fruit', emoji:'🍎' },
-        { word:'Tỏa', en:'Shine', emoji:'✨' }, { word:'Nghe', en:'Listen', emoji:'👂' }
+        { word: 'Mèo', en: 'Cat', emoji: '🐱' },
+        { word: 'Rồng', en: 'Dragon', emoji: '🐲' },
+        { word: 'Táo', en: 'Apple', emoji: '🍎' },
+        { word: 'Xe đạp', en: 'Bicycle', emoji: '🚲' },
+        { word: 'Lửa', en: 'Fire', emoji: '🔥' },
+        { word: 'Bay', en: 'Fly', emoji: '✈️' }
     ];
 
-    const toneData = [
-        { name:'Sắc', en:'Rising', mark:'´' },
-        { name:'Huyền', en:'Falling', mark:'`' },
-        { name:'Hỏi', en:'Dipping', mark:'?' },
-        { name:'Ngã', en:'Broken', mark:'~' },
-        { name:'Nặng', en:'Low', mark:'.' }
+    // Skill & Accessory Definitions
+    const skillList = [
+        { id: 'fly', name: 'Flying', emoji: '✈️', anim: 'anim-flying', type: 'skill' },
+        { id: 'bicycle', name: 'Riding Bike', emoji: '🚲', anim: 'anim-bicycle', type: 'skill' },
+        { id: 'fire', name: 'Fire Breathing', emoji: '🔥', anim: 'anim-fire', type: 'skill' }
     ];
 
-    const readingData = {
-        easy: [
-            { vi: "Con mèo nhỏ đang ngủ ngon trên chiếc ghế sofa màu xanh. Nó rất đáng yêu.", en: "The little cat is sleeping soundly on the blue sofa. It is very cute.", img: "🐱" },
-            { vi: "Em bé đang tập đi trong sân nhà. Bố và mẹ vỗ tay cổ vũ cho bé.", en: "The baby is learning to walk in the yard. Mom and Dad clap to cheer.", img: "👶" },
-            { vi: "Vườn hoa của bà có rất nhiều hoa hồng. Mùi hương của chúng rất thơm.", en: "Grandma's flower garden has many roses. Their scent is very fragrant.", img: "🌹" },
-            { vi: "Chú thỏ trắng thích ăn cà rốt giòn. Đôi tai của chú rất dài.", en: "The white rabbit likes eating crunchy carrots. Its ears are very long.", img: "🐰" },
-            { vi: "Con cá vàng bơi lội tung tăng trong bể nước trong xanh. Nó có cái đuôi đẹp.", en: "The goldfish swims around in the clear blue water tank. It has a beautiful tail.", img: "🐠" }
-        ],
-        medium: [
-            { vi: "Ông mặt trời thức dậy tỏa ánh sáng ấm áp xuống mặt đất. Chim hót líu lo trên cành.", en: "The sun wakes up and shines warm light on the ground. Birds sing on the branches.", img: "☀️" },
-            { vi: "Cả gia đình em cùng nhau ăn bữa cơm tối vui vẻ. Mẹ nấu món thịt kho rất ngon.", en: "My whole family has a happy dinner together. Mom cooks very delicious braised pork.", img: "🍚" },
-            { vi: "Hôm nay em được đi chơi công viên với bạn bè. Chúng em chơi cầu trượt và xích đu.", en: "Today I got to go to the park with my friends. We played on the slide and swings.", img: "🌳" },
-            { vi: "Mưa mùa hạ rơi tí tách trên mái nhà. Tiếng mưa nghe thật là êm đềm.", en: "Summer rain drops pitter-patter on the roof. The sound of rain is so peaceful.", img: "🌧️" },
-            { vi: "Bầu trời ban đêm có rất nhiều ngôi sao lấp lánh và một vầng trăng khuyết thật đẹp.", en: "The night sky has many twinkling stars and a beautiful crescent moon.", img: "🌙" }
-        ],
-        hard: [
-            { vi: "Tình cha ấm áp như vầng thái dương. Ngọt ngào như dòng nước tuôn đầu nguồn. Suốt đời vì con gian khổ, ân tình sâu nặng tựa biển khơi.", en: "Father's love is as warm as the sun. As sweet as the water flowing from the source. A lifetime of hardship for his children, his deep affection is like the vast ocean.", img: "👨" },
-            { vi: "Lòng mẹ bao la như biển Thái Bình dạt dào. Tình mẹ tha thiết như dòng suối hiền ngọt ngào. Lời ru êm ái đưa con vào giấc ngủ say.", en: "Mother's heart is as vast as the Pacific Ocean. Mother's love is as earnest as a sweet gentle stream. Her soft lullaby carries me into a deep sleep.", img: "👩" },
-            { vi: "Công cha như núi Thái Sơn, nghĩa mẹ như nước trong nguồn chảy ra. Một lòng thờ mẹ kính cha, cho tròn chữ hiếu mới là đạo con.", en: "Father's merit is like Mount Thai, Mother's devotion is like water flowing from its source. Wholeheartedly honor your mother and respect your father, to fulfill the duty of filial piety.", img: "🙏" },
-            { vi: "Trăm năm trong cõi người ta, chữ tài chữ mệnh khéo là ghét nhau. Trải qua một cuộc bể dâu, những điều trông thấy mà đau đớn lòng.", en: "In the span of a hundred years of human life, talent and destiny are often at odds. Having gone through such great upheavals, the things one witnesses are truly heart-wrenching.", img: "📜" },
-            { vi: "Dữ dội và dịu êm, ồn ào và lặng lẽ. Sông không hiểu nổi mình, sóng tìm ra tận bể. Ôi con sóng ngày xưa, và ngày sau vẫn thế.", en: "Fierce and gentle, noisy and silent. The river cannot understand itself, so the wave seeks the vast sea. Oh, the waves of the past, and those of the future, remain the same.", img: "🌊" },
-            { vi: "Tôi muốn tắt nắng đi cho màu đừng nhạt mất. Tôi muốn buộc gió lại cho hương đừng bay đi. Của ong bướm này đây tuần tháng mật.", en: "I want to turn off the sunlight so the colors won't fade. I want to bind the wind so the fragrance won't fly away. Here is the honeymoon of bees and butterflies.", img: "🐝" }
-        ]
-    };
+    const accList = [
+        { id: 'crown', name: 'Crown', emoji: '👑', type: 'acc' },
+        { id: 'glasses', name: 'Sunglasses', emoji: '🕶️', type: 'acc' },
+        { id: 'bow', name: 'Ribbon', emoji: '🎀', type: 'acc' }
+    ];
 
-    let myCards = JSON.parse(localStorage.getItem('myCards')) || [];
-    let sessionItems = [];
-    let currentStory = null;
+    // Player State
+    let xp = parseInt(localStorage.getItem('monster_xp')) || 0;
+    let isHatched = localStorage.getItem('monster_hatched') === 'true';
+    let unlockedCards = JSON.parse(localStorage.getItem('monster_cards')) || [];
+    let activeSkill = localStorage.getItem('monster_active_skill') || null;
+    let activeAcc = localStorage.getItem('monster_active_acc') || null;
 
-    function save() { localStorage.setItem('myCards', JSON.stringify(myCards)); }
+    function saveState() {
+        localStorage.setItem('monster_xp', xp);
+        localStorage.setItem('monster_hatched', isHatched);
+        localStorage.setItem('monster_cards', JSON.stringify(unlockedCards));
+        if(activeSkill) localStorage.setItem('monster_active_skill', activeSkill);
+        else localStorage.removeItem('monster_active_skill');
+        if(activeAcc) localStorage.setItem('monster_active_acc', activeAcc);
+        else localStorage.removeItem('monster_active_acc');
+    }
 
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -464,118 +204,102 @@
     }
 
     function updateUI() {
-        document.getElementById('cards-count').innerText = myCards.length;
-        if(document.getElementById('collection-screen').classList.contains('active')) renderCollection();
-    }
+        // Update XP Bar
+        const displayXp = Math.min(xp, 100);
+        document.getElementById('xp-val').innerText = displayXp;
+        document.getElementById('progress-bar').style.width = displayXp + '%';
 
-    function createCardHTML(card) {
-        const thumbUrl = `https://img.youtube.com/vi/${card.youtubeId}/mqdefault.jpg`;
-        return `
-            <div class="trading-card ${card.rarity}" onclick="playVideo('${card.youtubeId}', '${card.name}')">
-                <div class="card-category">${card.cat}</div>
-                <div class="card-image"><img src="${thumbUrl}" alt="${card.name}"></div>
-                <div>
-                    <div class="card-name">${card.name}</div>
-                    <div class="card-stats">${card.stats}</div>
-                </div>
-                <div style="font-size: 0.8rem; color: var(--primary); font-weight: bold; margin-top: 5px;">▶ Xem ngay / Watch</div>
-            </div>
-        `;
-    }
+        const headEl = document.getElementById('char-head');
+        const accEl = document.getElementById('char-acc');
+        const skillEffectEl = document.getElementById('char-skill-effect');
+        const titleEl = document.getElementById('monster-status-title');
 
-    function renderCollection() {
-        const grid = document.getElementById('card-collection-grid');
-        grid.innerHTML = '';
-        if (myCards.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1">Bạn chưa có video nào. Hãy làm bài tập để nhận video!<br><small>No videos yet. Complete quizzes to earn them!</small></p>';
-            return;
+        if (!isHatched) {
+            headEl.innerText = '🥚';
+            titleEl.innerText = 'Egg Progress: ' + displayXp + '/100 XP';
+            document.getElementById('progress-text').innerText = displayXp + ' / 100 XP to Hatch';
+        } else {
+            headEl.innerText = '🐲'; // Hatched Cute Dragon!
+            titleEl.innerText = 'Your Mythical Dragon!';
+            document.getElementById('progress-text').innerText = 'Hatched & Fully Evolved! 🎉';
         }
-        myCards.forEach(cardId => {
-            const card = allCards.find(c => c.id === cardId);
-            if(card) {
-                const el = document.createElement('div');
-                el.innerHTML = createCardHTML(card);
-                grid.appendChild(el.firstElementChild);
+
+        // Apply Accessories
+        accEl.innerText = activeAcc ? (accList.find(a => a.id === activeAcc)?.emoji || '') : '';
+
+        // Apply Animations & Skill Effects
+        headEl.className = 'char-part char-head';
+        skillEffectEl.style.opacity = '0';
+
+        if (activeSkill) {
+            const skillObj = skillList.find(s => s.id === activeSkill);
+            if (skillObj) {
+                headEl.classList.add(skillObj.anim);
+                skillEffectEl.innerText = skillObj.emoji;
+                skillEffectEl.style.opacity = '1';
             }
+        }
+
+        renderCards();
+    }
+
+    function renderCards() {
+        const skillsContainer = document.getElementById('skills-container');
+        const accContainer = document.getElementById('acc-container');
+        skillsContainer.innerHTML = ''; accContainer.innerHTML = '';
+
+        skillList.forEach(s => {
+            const owned = unlockedCards.includes(s.id);
+            const card = document.createElement('div');
+            card.className = `card ${activeSkill === s.id ? 'active-card' : ''}`;
+            card.style.opacity = owned ? '1' : '0.4';
+            card.innerHTML = `<span style="font-size:2rem">${s.emoji}</span><br><b>${s.name}</b><br><small>${owned ? (activeSkill === s.id ? 'Active' : 'Perform') : 'Locked'}</small>`;
+            
+            if(owned) {
+                card.onclick = () => {
+                    activeSkill = (activeSkill === s.id) ? null : s.id;
+                    saveState(); updateUI();
+                };
+            }
+            skillsContainer.appendChild(card);
+        });
+
+        accList.forEach(a => {
+            const owned = unlockedCards.includes(a.id);
+            const card = document.createElement('div');
+            card.className = `card ${activeAcc === a.id ? 'active-card' : ''}`;
+            card.style.opacity = owned ? '1' : '0.4';
+            card.innerHTML = `<span style="font-size:2rem">${a.emoji}</span><br><b>${a.name}</b><br><small>${owned ? (activeAcc === a.id ? 'Equipped' : 'Wear') : 'Locked'}</small>`;
+            
+            if(owned) {
+                card.onclick = () => {
+                    activeAcc = (activeAcc === a.id) ? null : a.id;
+                    saveState(); updateUI();
+                };
+            }
+            accContainer.appendChild(card);
         });
     }
 
-    function playVideo(id, title) {
-        const container = document.getElementById('youtube-container');
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?rel=0&playsinline=1&modestbranding=1`;
-        
-        container.innerHTML = `
-            <iframe 
-                width="100%" 
-                height="100%" 
-                src="${embedUrl}" 
-                frameborder="0" 
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen 
-                playsinline
-                webkit-playsinline
-                sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation allow-presentation"
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-            </iframe>`;
-            
-        document.getElementById('video-playing-title').innerHTML = title;
-        document.getElementById('video-player-modal').style.display = 'flex';
-    }
-
-    function closeVideoPlayer() {
-        document.getElementById('youtube-container').innerHTML = '';
-        document.getElementById('video-player-modal').style.display = 'none';
-    }
-
-    function openCardPack() {
-        const card1 = allCards[Math.floor(Math.random() * allCards.length)];
-        let card2 = allCards[Math.floor(Math.random() * allCards.length)];
-        if (allCards.length > 1) { while (card2.id === card1.id) card2 = allCards[Math.floor(Math.random() * allCards.length)]; }
-        myCards.push(card1.id, card2.id);
-        save();
-        document.getElementById('reward-title').innerText = "BẠN NHẬN ĐƯỢC QUÀ! 🎁";
-        document.getElementById('reward-subtitle').innerHTML = "Nhấn vào gói quà để mở!<br><small>Tap the pack to open!</small>";
-        const packVisual = document.getElementById('pack-visual');
-        packVisual.style.display = 'flex';
-        packVisual.classList.remove('pack-burst');
-        const container = document.getElementById('reward-card-container');
-        container.style.display = 'none';
-        container.innerHTML = `<div class="revealed-card">${createCardHTML(card1)}</div><div class="revealed-card" style="animation-delay: 0.3s">${createCardHTML(card2)}</div>`;
-        document.getElementById('reward-close-btn').style.display = 'none';
-        document.getElementById('reward-modal').style.display = 'flex';
-        speak('Bạn nhận được video mới!');
-    }
-
-    function revealPack() {
-        const pack = document.getElementById('pack-visual');
-        pack.classList.add('pack-burst');
-        setTimeout(() => {
-            pack.style.display = 'none';
-            document.getElementById('reward-title').innerText = "CHÚC MỪNG! 🎉";
-            document.getElementById('reward-subtitle').innerHTML = "Bạn đã nhận được 2 video mới!<br><small>You got 2 new videos!</small>";
-            document.getElementById('reward-card-container').style.display = 'flex';
-            document.getElementById('reward-close-btn').style.display = 'inline-block';
-            speak('Oa! Video hay quá!');
-        }, 500);
-    }
-
-    function giveRandomCard() { openCardPack(); }
-    function closeRewardModal() { document.getElementById('reward-modal').style.display = 'none'; showScreen('map-screen'); }
-
+    // --- VOCABULARY & REWARD LOGIC ---
+    let currentSession = [];
     function startVocabSession() {
         showScreen('learn-screen');
-        document.getElementById('next-quiz-btn').style.display = 'none';
-        sessionItems = vocabData.sort(() => 0.5 - Math.random()).slice(0, 4);
+        currentSession = vocabData.sort(() => 0.5 - Math.random()).slice(0, 3);
         const grid = document.getElementById('learn-grid'); grid.innerHTML = '';
-        let revealed = 0;
-        sessionItems.forEach(item => {
-            const card = document.createElement('div'); card.className = 'learn-card';
-            card.innerHTML = `<span style="font-size:3.5rem;">${item.emoji}</span><div class="learn-text">${item.word}</div><div class="learn-text learn-text-en">${item.en}</div>`;
+        let revealedCount = 0;
+
+        currentSession.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'learn-card';
+            card.innerHTML = `<span style="font-size:2.5rem">${item.emoji}</span><p style="margin:5px 0;"><b>${item.word}</b></p>`;
             card.onclick = () => {
-                speak(item.word);
-                if(!card.classList.contains('revealed')){
-                    card.classList.add('revealed'); revealed++;
-                    if(revealed===4) document.getElementById('next-quiz-btn').style.display='block';
+                if(!card.classList.contains('revealed')) {
+                    card.classList.add('revealed');
+                    revealedCount++;
+                    if(revealedCount === currentSession.length) {
+                        document.getElementById('next-quiz-btn').style.display = 'block';
+                    }
                 }
             };
             grid.appendChild(card);
@@ -584,120 +308,48 @@
 
     function startVocabQuiz() {
         showScreen('quiz-screen');
-        let pool = [...sessionItems].sort(() => 0.5 - Math.random());
-        function next() {
-            if (pool.length === 0) { giveRandomCard(); return; }
-            let t = pool.pop();
-            document.getElementById('quiz-emoji').innerText = t.emoji;
-            document.getElementById('quiz-msg').innerText = '';
-            document.getElementById('quiz-msg').style.color = 'var(--text)';
-            let opts = [t, ...vocabData.filter(v => v.word !== t.word).sort(()=>0.5-Math.random()).slice(0, 3)].sort(() => 0.5 - Math.random());
-            const c = document.getElementById('quiz-options'); c.innerHTML = '';
-            opts.forEach(o => {
-                const b = document.createElement('div'); b.className = 'option-card';
-                b.innerHTML = `<b>${o.word}</b>`;
-                b.onclick = () => {
-                    speak(o.word);
-                    if(o.word === t.word) {
-                        document.getElementById('quiz-msg').innerHTML = '✅ Tuyệt vời! / Great!';
-                        document.getElementById('quiz-msg').style.color = 'var(--accent)';
-                        setTimeout(next, 1000);
-                    } else {
-                        document.getElementById('quiz-msg').innerHTML = '❌ Thử lại nhé! / Try again!';
-                        document.getElementById('quiz-msg').style.color = 'red';
-                    }
-                };
-                c.appendChild(b);
-            });
+        const target = currentSession[Math.floor(Math.random() * currentSession.length)];
+        document.getElementById('quiz-emoji').innerText = target.emoji;
+        document.getElementById('quiz-msg').innerText = '';
+
+        const options = document.getElementById('quiz-options'); options.innerHTML = '';
+        currentSession.forEach(o => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-primary'; btn.style.width = '80%';
+            btn.innerText = o.word;
+            btn.onclick = () => {
+                if(o === target) {
+                    processQuizReward();
+                } else {
+                    document.getElementById('quiz-msg').innerText = '❌ Thử lại! (Try again!)';
+                }
+            };
+            options.appendChild(btn);
+        });
+    }
+
+    function processQuizReward() {
+        // Award XP
+        xp += 10;
+        if (xp >= 100 && !isHatched) {
+            isHatched = true;
+            alert('🎉 Congratulations! Your Mythical Monster Egg hatched into a Cute Dragon! 🐲');
         }
-        next();
-    }
 
-    function startToneGame() {
-        showScreen('tone-screen');
-        let count = 0;
-        function next() {
-            if (count === 5) { giveRandomCard(); return; }
-            let t = toneData[Math.floor(Math.random()*toneData.length)];
-            document.getElementById('tone-mark').innerText = t.mark;
-            document.getElementById('tone-msg').innerText = `Câu hỏi ${count + 1}/5`;
-            document.getElementById('tone-msg').style.color = 'var(--text)';
-            const c = document.getElementById('tone-options'); c.innerHTML = '';
-            toneData.forEach(o => {
-                const b = document.createElement('div'); b.className = 'option-card';
-                b.innerHTML = `<b>${o.name}</b>`;
-                b.onclick = () => {
-                    speak(o.name);
-                    if(o.name === t.name) {
-                        count++;
-                        document.getElementById('tone-msg').innerHTML = '✅ Đúng rồi! / Correct!';
-                        document.getElementById('tone-msg').style.color = 'var(--accent)';
-                        setTimeout(next, 1000);
-                    } else {
-                        document.getElementById('tone-msg').innerHTML = '❌ Sai rồi! / Wrong!';
-                        document.getElementById('tone-msg').style.color = 'red';
-                    }
-                };
-                c.appendChild(b);
-            });
+        // Random Loot Drop (XP, Skill, or Accessory)
+        const lootPool = [...skillList, ...accList].filter(item => !unlockedCards.includes(item.id));
+        let rewardText = '+10 XP Gained!';
+
+        if (lootPool.length > 0 && Math.random() < 0.6) { // 60% chance to drop new item card
+            const reward = lootPool[Math.floor(Math.random() * lootPool.length)];
+            unlockedCards.push(reward.id);
+            rewardText = `🎉 +10 XP & Unlocked: ${reward.emoji} ${reward.name}!`;
         }
-        next();
-    }
 
-    function startReadingGame() {
-        showScreen('reading-screen');
-        document.getElementById('reading-level-select').style.display = 'block';
-        document.getElementById('reading-container').style.display = 'none';
+        saveState();
+        document.getElementById('quiz-msg').innerText = rewardText;
+        setTimeout(() => showScreen('home-screen'), 1800);
     }
-
-    function initReadingSession(level) {
-        const pool = readingData[level];
-        currentStory = pool[Math.floor(Math.random() * pool.length)];
-        
-        document.getElementById('reading-level-select').style.display = 'none';
-        document.getElementById('reading-container').style.display = 'block';
-        
-        document.getElementById('reading-illustration').innerText = currentStory.img;
-        document.getElementById('reading-text').innerText = currentStory.vi;
-        document.getElementById('reading-en').innerText = currentStory.en;
-        
-        speakCurrentReading();
-    }
-
-    function speakCurrentReading() {
-        if(currentStory) {
-            speak(currentStory.vi);
-        }
-    }
-
-    function finishReading() {
-        giveRandomCard();
-    }
-
-    function getBestVNVoice() {
-        const voices = window.speechSynthesis.getVoices();
-        const vnVoices = voices.filter(v => v.lang.includes('vi-VN'));
-        const premium = vnVoices.find(v => v.name.toLowerCase().includes('enhanced') || v.name.toLowerCase().includes('linh'));
-        return premium || vnVoices[0] || null;
-    }
-
-    function speak(t) { 
-        window.speechSynthesis.cancel(); 
-        const u = new SpeechSynthesisUtterance(t); 
-        u.lang = 'vi-VN'; 
-        
-        const bestVoice = getBestVNVoice();
-        if (bestVoice) u.voice = bestVoice;
-        
-        u.rate = 0.70; 
-        u.pitch = 1.0; 
-        window.speechSynthesis.speak(u); 
-    }
-    
-    window.speechSynthesis.onvoiceschanged = () => {
-        // Just triggers voice availability check
-        getBestVNVoice();
-    };
 
     updateUI();
 </script>
